@@ -5,11 +5,10 @@
 { config, pkgs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      #./hardware-configuration-laptop.nix
-      ./hardware-configuration-work.nix
-    ];
+  imports = [ # Include the results of the hardware scan.
+    #./hardware-configuration-laptop.nix
+    ./hardware-configuration-work.nix
+  ];
 
   # Bootloader.
   boot.loader = {
@@ -87,9 +86,8 @@
       };
     };
 
-    
     windowManager = {
-    #  bspwm.enable = true;
+      #  bspwm.enable = true;
       i3.enable = true;
     };
   };
@@ -148,9 +146,9 @@
     i3
     zsh
     parted
-    
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
+
+    #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    #  wget
   ];
 
   programs.zsh.enable = true;
@@ -207,7 +205,7 @@
   };
 
   # Load nvidia driver for Xorg and Wayland
-  services.xserver.videoDrivers = ["nvidia"];
+  services.xserver.videoDrivers = [ "nvidia" ];
 
   hardware.nvidia = {
 
@@ -230,7 +228,7 @@
     open = false;
 
     # Enable the Nvidia settings menu,
-	# accessible via `nvidia-settings`.
+    # accessible via `nvidia-settings`.
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.

@@ -93,16 +93,26 @@
     #   org.gradle.daemon.idletimeout=3600000
     # '';
 
-    ".config/dunst".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/dunst";
-    ".config/i3".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/i3";
-    ".config/kitty".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/kitty";
-    ".config/nvim".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/nvim";
-    ".config/picom".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/picom";
-    ".config/rofi".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/rofi";
-    ".tmux.conf".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/tmux/tmux.conf";
-    ".tmux".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/tmux";
-    ".zshenv".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/zsh/zshenv";
-    ".zshrc".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/zsh/zshrc";
+    ".config/dunst".source = config.lib.file.mkOutOfStoreSymlink
+      "/home/${config.home.username}/.dotfiles/dunst";
+    ".config/i3".source = config.lib.file.mkOutOfStoreSymlink
+      "/home/${config.home.username}/.dotfiles/i3";
+    ".config/kitty".source = config.lib.file.mkOutOfStoreSymlink
+      "/home/${config.home.username}/.dotfiles/kitty";
+    ".config/nvim".source = config.lib.file.mkOutOfStoreSymlink
+      "/home/${config.home.username}/.dotfiles/nvim";
+    ".config/picom".source = config.lib.file.mkOutOfStoreSymlink
+      "/home/${config.home.username}/.dotfiles/picom";
+    ".config/rofi".source = config.lib.file.mkOutOfStoreSymlink
+      "/home/${config.home.username}/.dotfiles/rofi";
+    ".tmux.conf".source = config.lib.file.mkOutOfStoreSymlink
+      "/home/${config.home.username}/.dotfiles/tmux/tmux.conf";
+    ".tmux".source = config.lib.file.mkOutOfStoreSymlink
+      "/home/${config.home.username}/.dotfiles/tmux";
+    ".zshenv".source = config.lib.file.mkOutOfStoreSymlink
+      "/home/${config.home.username}/.dotfiles/zsh/zshenv";
+    ".zshrc".source = config.lib.file.mkOutOfStoreSymlink
+      "/home/${config.home.username}/.dotfiles/zsh/zshrc";
   };
 
   #xdg.configFile."i3".source = ./.dotfiles/i3;
@@ -118,9 +128,7 @@
   #
   #  /etc/profiles/per-user/alex/etc/profile.d/hm-session-vars.sh
   #
-  home.sessionVariables = {
-    EDITOR = "nvim";
-  };
+  home.sessionVariables = { EDITOR = "nvim"; };
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
