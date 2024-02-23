@@ -109,6 +109,8 @@
       "/home/${config.home.username}/.dotfiles/tmux/tmux.conf";
     ".tmux".source = config.lib.file.mkOutOfStoreSymlink
       "/home/${config.home.username}/.dotfiles/tmux";
+    ".oh-my-zsh".source = config.lib.file.mkOutOfStoreSymlink
+      "/home/${config.home.username}/.dotfiles/ohmyzsh";
     ".zshenv".source = config.lib.file.mkOutOfStoreSymlink
       "/home/${config.home.username}/.dotfiles/zsh/zshenv";
     ".zshrc".source = config.lib.file.mkOutOfStoreSymlink
@@ -128,7 +130,7 @@
   #
   #  /etc/profiles/per-user/alex/etc/profile.d/hm-session-vars.sh
   #
-  home.sessionVariables = { EDITOR = "nvim"; };
+  home.sessionVariables = { EDITOR = "nvim"; NIX_BUILD_SHELL = "zsh"; };
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
