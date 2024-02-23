@@ -75,8 +75,6 @@
     pkgs.nodejs_21
     pkgs.cargo
     pkgs.nil
-
-    pkgs.nixfmt
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -130,8 +128,21 @@
   #
   #  /etc/profiles/per-user/alex/etc/profile.d/hm-session-vars.sh
   #
-  home.sessionVariables = { EDITOR = "nvim"; NIX_BUILD_SHELL = "zsh"; };
+  home.sessionVariables = {
+    EDITOR = "nvim";
+    NIX_BUILD_SHELL = "zsh";
+  };
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
+
+  programs = {
+    direnv = {
+      enable = true;
+      enableZshIntegration = true;
+      nix-direnv.enable = true;
+    };
+
+    zsh.enable = true;
+  };
 }
