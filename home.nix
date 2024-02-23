@@ -75,6 +75,8 @@
     pkgs.nodejs_21
     pkgs.cargo
     pkgs.nil
+
+    pkgs.nixfmt
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
