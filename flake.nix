@@ -19,10 +19,23 @@
       lib = nixpkgs.lib;
     in {
       nixosConfigurations = {
-        nixos = lib.nixosSystem {
+        laptop = lib.nixosSystem {
           inherit system;
           modules = [
-            ./configuration.nix
+            ./hosts/laptop
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.alex = { imports = [ ./home.nix ]; };
+            }
+          ];
+        };
+
+        work = lib.nixosSystem {
+          inherit system;
+          modules = [
+            ./hosts/work
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
@@ -32,6 +45,7 @@
           ];
         };
       };
+
       hmConfig = {
         alex = home-manager.lib.homeManagerConfiguration {
           #inherit system pkgs;
