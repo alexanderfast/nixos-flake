@@ -53,6 +53,13 @@
     pkgs.python39Packages.pip
     pkgs.python39Packages.pygments
     pkgs.pipenv
+
+    #pkgs.clang
+    pkgs.cmake
+    #pkgs.glibc
+    #pkgs.libclang
+    #pkgs.lldb
+    pkgs.gcc
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -76,6 +83,7 @@
     ".config/picom".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/picom";
     ".config/rofi".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/rofi";
     ".tmux.conf".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/tmux/tmux.conf";
+    ".tmux".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/tmux";
     ".zshenv".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/zsh/zshenv";
     ".zshrc".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/zsh/zshrc";
   };
