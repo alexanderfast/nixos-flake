@@ -39,9 +39,10 @@
     #pkgs.webcamoid
     pkgs.git
     pkgs.kitty
-    pkgs.zsh
+    #pkgs.zsh
     pkgs.openconnect
     pkgs.slack
+    pkgs.starship
 
     pkgs.xfce.xfce4-power-manager
     pkgs.xfce.xfce4-battery-plugin
@@ -49,6 +50,7 @@
 
     pkgs.python39
     pkgs.python39Packages.pip
+    pkgs.python39Packages.pygments
     pkgs.pipenv
   ];
 
@@ -68,6 +70,7 @@
 
     ".config/i3".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/i3";
     ".config/kitty".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/kitty";
+    ".zshrc".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/zsh/zshrc";
   };
 
   #xdg.configFile."i3".source = ./.dotfiles/i3;

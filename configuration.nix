@@ -68,7 +68,7 @@
     xkb = {
       layout = "se";
       variant = "nodeadkeys";
-      options = "ctrl:swapcaps";
+      #options = "ctrl:swapcaps";
     };
 
     displayManager = {
@@ -146,10 +146,14 @@
     tmux
     killall
     i3
+    zsh
     
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
   ];
+
+  programs.zsh.enable = true;
+  users.users.alex.shell = pkgs.zsh;
 
   xdg = {
     portal = {
