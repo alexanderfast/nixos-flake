@@ -43,6 +43,7 @@
     pkgs.openconnect
     pkgs.slack
     pkgs.starship
+    pkgs.tmux
 
     pkgs.xfce.xfce4-power-manager
     pkgs.xfce.xfce4-battery-plugin
@@ -68,8 +69,14 @@
     #   org.gradle.daemon.idletimeout=3600000
     # '';
 
+    ".config/dunst".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/dunst";
     ".config/i3".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/i3";
     ".config/kitty".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/kitty";
+    ".config/nvim".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/nvim";
+    ".config/picom".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/picom";
+    ".config/rofi".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/rofi";
+    ".tmux.conf".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/tmux/tmux.conf";
+    ".zshenv".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/zsh/zshenv";
     ".zshrc".source = config.lib.file.mkOutOfStoreSymlink "/home/${config.home.username}/.dotfiles/zsh/zshrc";
   };
 
