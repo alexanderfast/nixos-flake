@@ -126,11 +126,11 @@
     isNormalUser = true;
     description = "Alex";
     extraGroups = [ "networkmanager" "wheel" "camera" "video" "audio" "lp" ];
-    packages = with pkgs; [
-      firefox
+    #packages = with pkgs; [
+    #  firefox
     #  kate
     #  thunderbird
-    ];
+    #];
   };
 
   # Allow unfree packages
@@ -147,6 +147,7 @@
     killall
     i3
     zsh
+    parted
     
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
@@ -155,16 +156,16 @@
   programs.zsh.enable = true;
   users.users.alex.shell = pkgs.zsh;
 
-  xdg = {
-    portal = {
-      enable = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-wlr
-        xdg-desktop-portal-gtk
-      ];
-      gtkUsePortal = true;
-    };
-  };
+  #xdg = {
+  #  portal = {
+  #    enable = true;
+  #    extraPortals = with pkgs; [
+  #      xdg-desktop-portal-wlr
+  #      xdg-desktop-portal-gtk
+  #    ];
+  #    gtkUsePortal = true;
+  #  };
+  #};
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

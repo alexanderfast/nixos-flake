@@ -41,9 +41,17 @@
     pkgs.kitty
     #pkgs.zsh
     pkgs.openconnect
-    pkgs.slack
     pkgs.starship
     pkgs.tmux
+    pkgs.fzf
+    pkgs.unzip
+
+    pkgs.firefox
+    pkgs.slack
+    pkgs.rofi
+    pkgs.feh
+    pkgs.dunst
+    pkgs.libnotify
 
     pkgs.xfce.xfce4-power-manager
     pkgs.xfce.xfce4-battery-plugin
@@ -60,6 +68,13 @@
     #pkgs.libclang
     #pkgs.lldb
     pkgs.gcc
+
+    # needed by nvim
+    #pkgs.nodePackages.npm
+    pkgs.ripgrep
+    pkgs.nodejs_21
+    pkgs.cargo
+    pkgs.nil
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
