@@ -1,9 +1,10 @@
 { config, pkgs, ... }:
 
 {
-  imports = [ # Include the results of the hardware scan.
+  imports = [
     ./hardware.nix
     ../../configuration.nix
+    ../../modules/i3.nix
   ];
 
   services.xserver.xkb.options = "ctrl:swapcaps";
