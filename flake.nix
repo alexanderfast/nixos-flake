@@ -19,6 +19,19 @@
       lib = nixpkgs.lib;
     in {
       nixosConfigurations = {
+        alien = lib.nixosSystem {
+          inherit system;
+          modules = [
+            ./hosts/alien
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.alex = { imports = [ ./home.nix ]; };
+            }
+          ];
+        };
+
         laptop = lib.nixosSystem {
           inherit system;
           modules = [
@@ -46,7 +59,7 @@
         };
       };
 
-      hmConfig = {
+      homeManagerConfigurations = {
         alex = home-manager.lib.homeManagerConfiguration {
           #inherit system pkgs;
           pkgs = nixpkgs.legacyPackages.${system};
