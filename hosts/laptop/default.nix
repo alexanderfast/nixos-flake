@@ -10,4 +10,9 @@
   services.xserver.xkb.options = "ctrl:swapcaps";
   networking.hostName = "laptop";
   networking.networkmanager.wifi.powersave = false;
+
+  environment.systemPackages = with pkgs; [
+    brightnessctl
+  ];
+
 }
