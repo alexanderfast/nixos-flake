@@ -11,7 +11,7 @@
     };
 
     displayManager = {
-      sddm.enable = true;
+      #sddm.enable = true;
       #defaultSession = "none+bspwm";
       defaultSession = "xfce";
     };

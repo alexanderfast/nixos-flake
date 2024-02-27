@@ -2,7 +2,8 @@
 
 {
   imports = [
-    ./home-xfce4-i3.nix
+    #./home-xfce4-i3.nix
+    ./home-xfce.nix
   ];
 
   # Home Manager needs a bit of information about you and the paths it should
@@ -84,6 +85,8 @@
     pkgs.kubernetes
     pkgs.vault
     pkgs.go-task
+    pkgs.jq
+    pkgs.tree
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
