@@ -3,7 +3,7 @@
 {
   imports = [
     #./home-xfce4-i3.nix
-    ./home-xfce.nix
+    #./home-xfce.nix
   ];
 
   # Home Manager needs a bit of information about you and the paths it should

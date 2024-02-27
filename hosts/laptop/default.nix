@@ -4,7 +4,7 @@
   imports = [
     ./hardware.nix
     ../../configuration.nix
-    ../../modules/i3.nix
+    ../../modules/home-xfce4-i3.nix
   ];
 
   services.xserver.xkb.options = "ctrl:swapcaps";
@@ -14,5 +14,4 @@
   environment.systemPackages = with pkgs; [
     brightnessctl
   ];
-
 }
