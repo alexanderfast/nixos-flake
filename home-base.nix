@@ -51,15 +51,8 @@
     pkgs.fzf
     pkgs.unzip
 
-    pkgs.firefox
-    pkgs.slack
-    pkgs.rofi
-    pkgs.feh
-    pkgs.dunst
-    pkgs.libnotify
-
-    pkgs.xfce.xfce4-power-manager
-    pkgs.xfce.xfce4-battery-plugin
+    #pkgs.xfce.xfce4-power-manager
+    #pkgs.xfce.xfce4-battery-plugin
     pkgs.xfce.xfce4-terminal
 
     pkgs.python39
