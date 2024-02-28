@@ -27,7 +27,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.alex = { imports = [ ./home.nix ]; };
+              home-manager.users.alex = { imports = [ ./home/alien/home.nix ]; };
             }
           ];
         };
@@ -40,7 +40,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.alex = { imports = [ ./home.nix ]; };
+              home-manager.users.alex = { imports = [ ./hosts/laptop/home.nix ]; };
             }
           ];
         };
@@ -53,7 +53,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.alex = { imports = [ ./home.nix ]; };
+              home-manager.users.alex = { imports = [ ./home/work/home.nix ]; };
             }
           ];
         };
@@ -63,7 +63,7 @@
         alex = home-manager.lib.homeManagerConfiguration {
           #inherit system pkgs;
           pkgs = nixpkgs.legacyPackages.${system};
-          modules = [ ./home.nix ];
+          modules = [ ./home-base.nix ];
         };
       };
     };
