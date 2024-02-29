@@ -22,17 +22,13 @@
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
-  home.packages = [
-    # # Adds the 'hello' command to your environment. It prints a friendly
-    # # "Hello, world!" when run.
-    #pkgs.hello
-
+  home.packages = with pkgs; [
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
     # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
     # # fonts?
     # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
-    (pkgs.nerdfonts.override { fonts = [ "Hack" ]; })
+    (nerdfonts.override { fonts = [ "Hack" ]; })
 
     # # You can also create simple shell scripts directly inside your
     # # configuration. For example, this adds a command 'my-hello' to your
@@ -41,40 +37,39 @@
     #   echo "Hello, ${config.home.username}!"
     # '')
 
-    #pkgs.webcamoid
-    pkgs.git
-    pkgs.kitty
-    #pkgs.zsh
-    pkgs.openconnect
-    pkgs.starship
-    pkgs.tmux
-    pkgs.fzf
-    pkgs.unzip
-    pkgs.dos2unix
+    git
+    kitty
+    openconnect
+    starship
+    tmux
+    fzf
+    unzip
+    dos2unix
 
-    #pkgs.xfce.xfce4-power-manager
-    #pkgs.xfce.xfce4-battery-plugin
-    pkgs.xfce.xfce4-terminal
+    xfce.xfce4-terminal
 
-    pkgs.python39
-    pkgs.python39Packages.pip
-    pkgs.python39Packages.pygments
-    pkgs.pipenv
+    python39
+    python39Packages.pip
+    python39Packages.pygments
+    python39Packages.autopep8
+    pipenv
 
-    #pkgs.clang
-    pkgs.cmake
-    #pkgs.glibc
-    #pkgs.libclang
-    #pkgs.lldb
-    pkgs.gcc
+    gnumake
+    cmake
+    gcc
 
     # needed by nvim
-    #pkgs.nodePackages.npm
-    pkgs.ripgrep
-    pkgs.nodejs_21
-    pkgs.cargo
-    pkgs.nil
-
+    ripgrep
+    nodejs_21
+    cargo
+    nil
+    #flake8
+    #json-lsp
+    lua-language-server
+    pyright
+    shellcheck
+    shfmt
+    stylua
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
