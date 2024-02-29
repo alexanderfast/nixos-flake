@@ -27,7 +27,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.alex = { imports = [ ./home/alien/home.nix ]; };
+              home-manager.users.alex = { imports = [ ./hosts/alien/home.nix ]; };
             }
           ];
         };
@@ -53,7 +53,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.alex = { imports = [ ./home/work/home.nix ]; };
+              home-manager.users.alex = { imports = [ ./hosts/work/home.nix ]; };
             }
           ];
         };

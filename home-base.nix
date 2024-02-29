@@ -50,6 +50,7 @@
     pkgs.tmux
     pkgs.fzf
     pkgs.unzip
+    pkgs.dos2unix
 
     #pkgs.xfce.xfce4-power-manager
     #pkgs.xfce.xfce4-battery-plugin
@@ -74,12 +75,6 @@
     pkgs.cargo
     pkgs.nil
 
-    pkgs.k9s
-    pkgs.kubernetes
-    pkgs.vault
-    pkgs.go-task
-    pkgs.jq
-    pkgs.tree
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
