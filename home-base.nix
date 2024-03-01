@@ -52,6 +52,7 @@
     python39Packages.pip
     python39Packages.pygments
     python39Packages.autopep8
+    python39Packages.autoflake
     pipenv
 
     gnumake
@@ -63,8 +64,6 @@
     nodejs_21
     cargo
     nil
-    #flake8
-    #json-lsp
     lua-language-server
     pyright
     shellcheck
