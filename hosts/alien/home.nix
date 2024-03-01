@@ -1,8 +1,5 @@
 { config, pkgs, ... }:
 
 {
-  imports = [
-    ../../home-base.nix
-    ../../home-desktop.nix
-  ];
+  imports = [ ../../home-base.nix ../../home-desktop.nix ];
 }

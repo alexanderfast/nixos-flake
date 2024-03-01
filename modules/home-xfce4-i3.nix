@@ -1,12 +1,7 @@
 { config, pkgs, lib, ... }:
 
 {
-  environment = {
-    systemPackages = with pkgs; [
-      zuki-themes
-      picom
-    ];
-  };
+  environment = { systemPackages = with pkgs; [ zuki-themes picom ]; };
 
   #gtk = {
   #  enable = true;
@@ -30,9 +25,7 @@
   #  };
   #};
 
-  hardware = {
-    bluetooth.enable = true;
-  };
+  hardware = { bluetooth.enable = true; };
 
   #programs.gpg.enable = true;
 
@@ -69,9 +62,7 @@
     };
     xserver = {
       enable = true;
-      excludePackages = with pkgs; [
-        xterm
-      ];
+      excludePackages = with pkgs; [ xterm ];
       xkb = {
         layout = "se";
         variant = "nodeadkeys";

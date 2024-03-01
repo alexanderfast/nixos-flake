@@ -31,7 +31,9 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.alex = { imports = [ ./hosts/alien/home.nix ]; };
+              home-manager.users.alex = {
+                imports = [ ./hosts/alien/home.nix ];
+              };
             }
           ];
         };
@@ -44,7 +46,9 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.alex = { imports = [ ./hosts/laptop/home.nix ]; };
+              home-manager.users.alex = {
+                imports = [ ./hosts/laptop/home.nix ];
+              };
             }
           ];
         };
@@ -57,15 +61,14 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.alex = { imports = [ ./hosts/work/home.nix ]; };
+              home-manager.users.alex = {
+                imports = [ ./hosts/work/home.nix ];
+              };
             }
             nix-ld.nixosModules.nix-ld
             {
               programs.nix-ld.enable = true;
-              programs.nix-ld.libraries = with pkgs; [
-                stdenv.cc.cc
-                libz
-              ];
+              programs.nix-ld.libraries = with pkgs; [ stdenv.cc.cc libz ];
             }
           ];
         };

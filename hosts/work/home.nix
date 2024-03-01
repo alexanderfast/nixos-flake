@@ -1,10 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  imports = [
-    ../../home-base.nix
-    ../../home-desktop.nix
-  ];
+  imports = [ ../../home-base.nix ../../home-desktop.nix ];
 
   home.packages = [
     pkgs.hello
