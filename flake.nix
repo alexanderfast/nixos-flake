@@ -7,9 +7,13 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-ld = {
+      url = "github:Mic92/nix-ld";
+      #inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager }:
+  outputs = { self, nixpkgs, home-manager, nix-ld }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -54,6 +58,14 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.users.alex = { imports = [ ./hosts/work/home.nix ]; };
+            }
+            nix-ld.nixosModules.nix-ld
+            {
+              programs.nix-ld.enable = true;
+              programs.nix-ld.libraries = with pkgs; [
+                stdenv.cc.cc
+                libz
+              ];
             }
           ];
         };
