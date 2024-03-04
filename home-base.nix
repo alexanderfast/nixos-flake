@@ -69,6 +69,7 @@
     shellcheck
     shfmt
     stylua
+    nodePackages.prettier
     prettierd
     jsonfmt
     bat
