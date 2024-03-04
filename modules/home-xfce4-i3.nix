@@ -3,33 +3,7 @@
 {
   environment = { systemPackages = with pkgs; [ zuki-themes picom ]; };
 
-  #gtk = {
-  #  enable = true;
-  #  iconTheme = {
-  #    name = "elementary-Xfce-dark";
-  #    package = pkgs.elementary-xfce-icon-theme;
-  #  };
-  #  theme = {
-  #    name = "zukitre-dark";
-  #    package = pkgs.zuki-themes;
-  #  };
-  #  gtk3.extraConfig = {
-  #    Settings = ''
-  #      gtk-application-prefer-dark-theme=1
-  #    '';
-  #  };
-  #  gtk4.extraConfig = {
-  #    Settings = ''
-  #      gtk-application-prefer-dark-theme=1
-  #    '';
-  #  };
-  #};
-
   hardware = { bluetooth.enable = true; };
-
-  #programs.gpg.enable = true;
-
-  #services.gpg-agent.enable = true;
 
   programs = {
     dconf.enable = true;
@@ -75,8 +49,8 @@
             theme.name = "Zukitre-dark";
           };
         };
+        defaultSession = "xfce+i3";
       };
-      #desktopManager.xfce.enable = true;
       desktopManager = {
         plasma5.enable = false;
         xterm.enable = false;
@@ -87,7 +61,6 @@
         };
       };
       windowManager = {
-        #  bspwm.enable = true;
         i3.enable = true;
       };
     };
