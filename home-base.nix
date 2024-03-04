@@ -72,6 +72,7 @@
     prettierd
     jsonfmt
     bat
+    vscode-langservers-extracted
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
