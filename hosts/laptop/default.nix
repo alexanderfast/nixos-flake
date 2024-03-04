@@ -2,7 +2,7 @@
 
 {
   imports =
-    [ ./hardware.nix ../../configuration.nix ../../modules/home-xfce4-i3.nix ];
+    [ ./hardware.nix ../../configuration.nix ../../modules/plasma.nix ];
 
   services.xserver.xkb.options = "ctrl:swapcaps";
   networking.hostName = "laptop";
