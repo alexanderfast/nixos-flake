@@ -3,7 +3,16 @@
 {
   imports = [ ./home-base.nix ];
 
-  home.packages =
-    [ pkgs.firefox pkgs.slack pkgs.rofi pkgs.feh pkgs.dunst pkgs.libnotify pkgs.vlc pkgs.arandr ];
-
+  home.packages = with pkgs; [
+    firefox
+    slack
+    rofi
+    feh
+    dunst
+    libnotify
+    vlc
+    arandr
+    scrot
+    imagemagick
+  ];
 }
