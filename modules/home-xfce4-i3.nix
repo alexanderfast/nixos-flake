@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 
 {
-  environment = { systemPackages = with pkgs; [ zuki-themes picom ]; };
+  environment = { systemPackages = with pkgs; [ zuki-themes picom xautolock xss-lock ]; };
 
   hardware = { bluetooth.enable = true; };
 
@@ -58,6 +58,7 @@
           enable = true;
           noDesktop = true;
           enableXfwm = false;
+          enableScreensaver = false;
         };
       };
       windowManager = {
