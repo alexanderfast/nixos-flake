@@ -2,7 +2,9 @@
 
 {
   imports =
-    [ ./hardware.nix ../../configuration.nix ../../modules/home-xfce4-i3.nix ];
+    [ ./hardware.nix ../../configuration.nix ../../modules/home-xfce4-i3.nix
+    ../../modules/bootgrub.nix
+    ];
 
   services.xserver.xkb.options = "ctrl:swapcaps";
   services.xserver.libinput.touchpad.disableWhileTyping = true;

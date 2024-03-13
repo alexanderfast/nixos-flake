@@ -9,15 +9,15 @@
     #./xfce.nix
   ];
 
-  # Bootloader.
-  boot.loader = {
-    #systemd-boot.enable = true;
-    efi.canTouchEfiVariables = true;
-    grub.enable = true;
-    grub.efiSupport = true;
-    grub.device = "nodev";
-    grub.useOSProber = true;
-  };
+  ## Bootloader.
+  #boot.loader = {
+  #  #systemd-boot.enable = true;
+  #  efi.canTouchEfiVariables = true;
+  #  grub.enable = true;
+  #  grub.efiSupport = true;
+  #  grub.device = "nodev";
+  #  grub.useOSProber = true;
+  #};
 
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 

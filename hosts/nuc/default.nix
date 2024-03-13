@@ -4,11 +4,11 @@
   imports = [
     ./hardware.nix
     ../../configuration.nix
-    ../../xfc4.nix
-    ../../modules/bootgrub.nix
+    #../../xfc4.nix
     ../../modules/plasma.nix
     #../../modules/nvidia.nix
+    ../../modules/bootsystemd.nix
   ];
 
-  networking.hostName = "alien";
+  networking.hostName = "nuc";
 }
