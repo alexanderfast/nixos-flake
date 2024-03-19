@@ -74,6 +74,8 @@
     jsonfmt
     bat
     vscode-langservers-extracted
+
+    wally-cli
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage

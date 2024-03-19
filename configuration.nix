@@ -204,4 +204,6 @@
     package = pkgs.nixFlakes;
     extraOptions = "experimental-features = nix-command flakes";
   };
+
+  hardware.keyboard.zsa.enable = true;
 }
