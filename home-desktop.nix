@@ -14,5 +14,6 @@
     arandr
     scrot
     imagemagick
+    shutter
   ];
 }
