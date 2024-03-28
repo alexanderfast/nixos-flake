@@ -10,5 +10,6 @@
     go-task
     jq
     ninja
+    btop
   ];
 }
