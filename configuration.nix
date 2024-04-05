@@ -7,6 +7,7 @@
 {
   imports = [
     #./xfce.nix
+    ./modules/qbittorrent.nix
   ];
 
   ## Bootloader.
@@ -47,6 +48,12 @@
     LC_PAPER = "sv_SE.UTF-8";
     LC_TELEPHONE = "sv_SE.UTF-8";
     LC_TIME = "sv_SE.UTF-8";
+  };
+
+  services.qbittorrent = {
+    enable = true;
+    openFirewall = true;
+    port = 8080;
   };
 
   # Enable the X11 windowing system.

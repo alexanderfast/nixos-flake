@@ -19,4 +19,11 @@
     enable = true;
     openFirewall = true;
   };
+
+  #services.qbittorrent = {
+  #  enable = true;
+  #  dataDir = "/var/lib/qbittorrent";
+  #  openFirewall = true;
+  #  port = 8080;
+  #};
 }
