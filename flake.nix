@@ -3,17 +3,25 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
     nix-ld = {
       url = "github:Mic92/nix-ld";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    gitlablistpy = {
+      url = "github:alexanderfast/gitlablistpy";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
-  outputs = { self, nixpkgs, home-manager, nix-ld }:
+  outputs = { self, nixpkgs, home-manager, nix-ld, gitlablistpy }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -70,6 +78,11 @@
               programs.nix-ld.enable = true;
               programs.nix-ld.libraries = with pkgs; [ stdenv.cc.cc libz ];
             }
+            {
+              # TODO: move to home manager
+              environment.systemPackages =
+                [ gitlablistpy.packages.${system}.default ];
+            }
           ];
         };
 
@@ -81,9 +94,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.alex = {
-                imports = [ ./hosts/nuc/home.nix ];
-              };
+              home-manager.users.alex = { imports = [ ./hosts/nuc/home.nix ]; };
             }
           ];
         };
