@@ -49,12 +49,13 @@
 
     xfce.xfce4-terminal
 
-    python39
-    python39Packages.pip
-    python39Packages.pygments
-    python39Packages.autopep8
-    python39Packages.autoflake
-    pipenv
+    #python39
+    #python39Packages.pip
+    #python39Packages.pygments
+    #python39Packages.autopep8
+    #python39Packages.autoflake
+    #pipenv
+    chroma
 
     gnumake
     cmake
