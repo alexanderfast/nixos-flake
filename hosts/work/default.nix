@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  imports = [ # Include the results of the hardware scan.
+  imports = [
     ./hardware.nix
     ../../configuration.nix
     ../../modules/home-xfce4-i3.nix
