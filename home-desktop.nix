@@ -15,5 +15,6 @@
     scrot
     imagemagick
     shutter
+    remmina
   ];
 }
