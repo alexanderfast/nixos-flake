@@ -10,12 +10,6 @@
       variant = "nodeadkeys";
     };
 
-    displayManager = {
-      #sddm.enable = true;
-      #defaultSession = "none+bspwm";
-      defaultSession = "xfce";
-    };
-
     desktopManager = {
       plasma5.enable = false;
       xterm.enable = false;
@@ -31,4 +25,6 @@
       i3.enable = true;
     };
   };
+
+  services.displayManager.defaultSession = "xfce";
 }

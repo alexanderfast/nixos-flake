@@ -49,7 +49,6 @@
             theme.name = "Zukitre-dark";
           };
         };
-        defaultSession = "xfce+i3";
       };
       desktopManager = {
         plasma5.enable = false;
@@ -67,4 +66,5 @@
     };
   };
 
+  services.displayManager.defaultSession = "xfce+i3";
 }

@@ -3,6 +3,7 @@
 {
   services.xserver.enable = true;
   services.xserver.displayManager.sddm.enable = true;
-  services.xserver.displayManager.defaultSession = "plasma";
   services.xserver.desktopManager.plasma5.enable = true;
+
+  services.displayManager.defaultSession = "plasma";
 }

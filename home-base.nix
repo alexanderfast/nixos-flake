@@ -64,7 +64,7 @@
 
     # needed by nvim
     ripgrep
-    nodejs_21
+    nodejs
     cargo
     nil
     lua-language-server
