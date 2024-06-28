@@ -46,6 +46,7 @@
     unzip
     dos2unix
     xclip
+    zoxide
 
     xfce.xfce4-terminal
 
