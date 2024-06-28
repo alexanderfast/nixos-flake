@@ -12,6 +12,7 @@
     libnotify
     vlc
     arandr
+    autorandr
     scrot
     imagemagick
     shutter
