@@ -9,7 +9,9 @@
   ];
 
   services.xserver.xkb.options = "ctrl:swapcaps";
-  services.xserver.libinput.touchpad.disableWhileTyping = true;
+  services.libinput.enable = true;
+  services.libinput.touchpad.disableWhileTyping = true;
+  services.xserver.synaptics.enable = false;
   networking.hostName = "laptop";
   networking.networkmanager.wifi.powersave = false;
 
