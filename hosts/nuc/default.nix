@@ -67,10 +67,15 @@
       '';
 
       peers = [
-        { # peer0
+        { # peer0, laptop
           publicKey = "wMYARVyMbiPjBqpXR6L+d0UEYl+T0yPo2yPeo4r4TDg=";
           presharedKeyFile = "/srv/wireguard/peer0/private";
           allowedIPs = [ "10.0.0.2/32" ];
+        }
+        { # peer1, phone
+          publicKey = "8PHVKZ20Wf91/In3opLKYiEHSGb6tTRzlNMwN29TEHM=";
+          presharedKeyFile = "/srv/wireguard/peer1/private";
+          allowedIPs = [ "10.0.0.3/32" ];
         }
         # More peers can be added here.
       ];
