@@ -8,6 +8,8 @@
 
     pkgs.xfce.xfce4-power-manager
     pkgs.xfce.xfce4-battery-plugin
+
+    pkgs.wireguard-tools
   ];
 
 }
