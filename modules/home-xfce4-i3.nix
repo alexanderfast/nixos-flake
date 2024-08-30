@@ -23,6 +23,8 @@
 
   security.pam.services.gdm.enableGnomeKeyring = true;
 
+  sound.enable = true;
+
   services = {
     blueman.enable = true;
     gnome.gnome-keyring.enable = true;
