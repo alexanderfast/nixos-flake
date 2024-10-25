@@ -1,24 +1,83 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ config, pkgs, ... }:
-
+# This is your system's configuration file.
+# Use this to configure your system environment (it replaces /etc/nixos/configuration.nix)
 {
+  inputs,
+  outputs,
+  lib,
+  config,
+  pkgs,
+  ...
+}: {
+  # You can import other NixOS modules here
   imports = [
-    #./xfce.nix
-    ./modules/qbittorrent.nix
+    # If you want to use modules your own flake exports (from modules/nixos):
+    # outputs.nixosModules.example
+
+    # Or modules from other flakes (such as nixos-hardware):
+    # inputs.hardware.nixosModules.common-cpu-amd
+    # inputs.hardware.nixosModules.common-ssd
+
+    # You can also split up your configuration and import pieces of it here:
+    # ./users.nix
+
+    # Import your generated (nixos-generate-config) hardware configuration
+    ./hardware-configuration.nix
+
+    # ../../configuration.nix
+    ../modules/home-xfce4-i3.nix
+    ../modules/nvidia.nix
+    ../modules/bootgrub.nix
   ];
 
-  ## Bootloader.
-  #boot.loader = {
-  #  #systemd-boot.enable = true;
-  #  efi.canTouchEfiVariables = true;
-  #  grub.enable = true;
-  #  grub.efiSupport = true;
-  #  grub.device = "nodev";
-  #  grub.useOSProber = true;
-  #};
+  nixpkgs = {
+    # You can add overlays here
+    overlays = [
+      # Add overlays your own flake exports (from overlays and pkgs dir):
+      outputs.overlays.additions
+      outputs.overlays.modifications
+      outputs.overlays.unstable-packages
+
+      # You can also add overlays exported from other flakes:
+      # neovim-nightly-overlay.overlays.default
+
+      # Or define it inline, for example:
+      # (final: prev: {
+      #   hi = final.hello.overrideAttrs (oldAttrs: {
+      #     patches = [ ./change-hello-to-hi.patch ];
+      #   });
+      # })
+    ];
+    # Configure your nixpkgs instance
+    config = {
+      # Disable if you don't want unfree packages
+      allowUnfree = true;
+    };
+  };
+
+  nix = let
+    flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
+  in {
+    settings = {
+      # Enable flakes and new 'nix' command
+      experimental-features = "nix-command flakes";
+      # Opinionated: disable global registry
+      flake-registry = "";
+      # Workaround for https://github.com/NixOS/nix/issues/9574
+      nix-path = config.nix.nixPath;
+    };
+    # Opinionated: disable channels
+    channel.enable = false;
+
+    # Opinionated: make flake registry and nix path match flake inputs
+    registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
+    nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
+
+    # package = pkgs.nixFlakes;
+    # extraOptions = "experimental-features = nix-command flakes";
+  };
+
+
+  networking.hostName = "work";
 
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -50,11 +109,11 @@
     LC_TIME = "sv_SE.UTF-8";
   };
 
-  services.qbittorrent = {
-    enable = true;
-    openFirewall = true;
-    port = 8080;
-  };
+  # services.qbittorrent = {
+  #   enable = true;
+  #   openFirewall = true;
+  #   port = 8080;
+  # };
 
   # Enable the X11 windowing system.
   #services.xserver.enable = true;
@@ -132,8 +191,6 @@
     #];
   };
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -149,9 +206,11 @@
     parted
     tree
     jq
-
-    #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    #  wget
+    ripgrep
+    git
+    starship
+    home-manager
+    fzf
   ];
 
   programs.zsh.enable = true;
@@ -208,12 +267,13 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
+  #
+  # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "23.11"; # Did you read the comment?
 
-  nix = {
-    package = pkgs.nixFlakes;
-    extraOptions = "experimental-features = nix-command flakes";
-  };
-
   hardware.keyboard.zsa.enable = true;
+
+  # # Enable home-manager and git
+  # programs.home-manager.enable = true;
+  # programs.git.enable = true;
 }

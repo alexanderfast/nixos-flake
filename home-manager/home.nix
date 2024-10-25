@@ -1,24 +1,64 @@
-{ config, pkgs, ... }:
-
+# This is your home-manager configuration file
+# Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 {
+  inputs,
+  outputs,
+  lib,
+  config,
+  pkgs,
+  ...
+}: {
+  # You can import other home-manager modules here
   imports = [
-    #./home-xfce4-i3.nix
-    #./home-xfce.nix
+    # If you want to use modules your own flake exports (from modules/home-manager):
+    # outputs.homeManagerModules.example
+
+    # Or modules exported from other flakes (such as nix-colors):
+    # inputs.nix-colors.homeManagerModules.default
+
+    # You can also split up your configuration and import pieces of it here:
+    # ./nvim.nix
   ];
 
-  # Home Manager needs a bit of information about you and the paths it should
-  # manage.
-  home.username = "alex";
-  home.homeDirectory = "/home/alex";
+  nixpkgs = {
+    # You can add overlays here
+    overlays = [
+      # Add overlays your own flake exports (from overlays and pkgs dir):
+      outputs.overlays.additions
+      outputs.overlays.modifications
+      outputs.overlays.unstable-packages
 
-  # This value determines the Home Manager release that your configuration is
-  # compatible with. This helps avoid breakage when a new Home Manager release
-  # introduces backwards incompatible changes.
-  #
-  # You should not change this value, even if you update Home Manager. If you do
-  # want to update the value, then make sure to first check the Home Manager
-  # release notes.
-  home.stateVersion = "23.11"; # Please read the comment before changing.
+      # You can also add overlays exported from other flakes:
+      # neovim-nightly-overlay.overlays.default
+
+      # Or define it inline, for example:
+      # (final: prev: {
+      #   hi = final.hello.overrideAttrs (oldAttrs: {
+      #     patches = [ ./change-hello-to-hi.patch ];
+      #   });
+      # })
+    ];
+    # Configure your nixpkgs instance
+    config = {
+      # Disable if you don't want unfree packages
+      allowUnfree = true;
+    };
+  };
+
+  home = {
+    username = "alex";
+    homeDirectory = "/home/alex";
+  };
+
+  # Add stuff for your user as you see fit:
+  # programs.neovim.enable = true;
+  # home.packages = with pkgs; [ steam ];
+
+  # Nicely reload system units when changing configs
+  systemd.user.startServices = "sd-switch";
+
+  # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
+  home.stateVersion = "23.05";
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
@@ -81,6 +121,22 @@
 
     wally-cli
     lazygit
+
+    # TODO: move to desktop module
+    firefox
+    slack
+    rofi
+    feh
+    dunst
+    libnotify
+    vlc
+    arandr
+    autorandr
+    scrot
+    imagemagick
+    shutter
+    remmina
+    btop
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -139,8 +195,8 @@
     NIX_BUILD_SHELL = "zsh";
   };
 
-  # Let Home Manager install and manage itself.
-  programs.home-manager.enable = true;
+  # # Let Home Manager install and manage itself.
+  # programs.home-manager.enable = true;
 
   programs = {
     direnv = {
