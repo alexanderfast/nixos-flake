@@ -59,9 +59,9 @@
     #pipenv
     chroma
 
-    gnumake
-    cmake
-    gcc
+    # gnumake
+    # cmake
+    # gcc
 
     # needed by nvim
     ripgrep
