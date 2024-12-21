@@ -97,7 +97,10 @@
     #python39Packages.autopep8
     #python39Packages.autoflake
     #pipenv
+
+    # needed by shell
     chroma
+    pygmentize
 
     # gnumake
     # cmake
