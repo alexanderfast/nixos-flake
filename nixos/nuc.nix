@@ -21,11 +21,12 @@
     # ./users.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
-    ./hardware-configuration.nix
+    # ./hardware-configuration.nix
+    ../hosts/nuc/hardware.nix
 
     # ../../configuration.nix
-    ../modules/home-xfce4-i3.nix
-    ../modules/nvidia.nix
+    #../modules/home-xfce4-i3.nix
+    #../modules/nvidia.nix
     ../modules/bootgrub.nix
   ];
 
@@ -77,7 +78,7 @@
   };
 
 
-  networking.hostName = "work";
+  networking.hostName = "nuc";
 
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -155,7 +156,7 @@
   # };
   #
   # Configure console keymap
-  console.keyMap = "sv-latin1";
+  # console.keyMap = "sv-latin1";
   console.useXkbConfig = true;
 
   # Enable CUPS to print documents.
@@ -276,4 +277,48 @@
   # # Enable home-manager and git
   # programs.home-manager.enable = true;
   # programs.git.enable = true;
+  services = {
+    blueman.enable = true;
+    gnome.gnome-keyring.enable = true;
+    pipewire = {
+      enable = true;
+      alsa = {
+        enable = true;
+        support32Bit = true;
+      };
+      pulse.enable = true;
+    };
+    xserver = {
+      enable = true;
+      excludePackages = with pkgs; [ xterm ];
+      xkb = {
+        layout = "se";
+        variant = "nodeadkeys";
+      };
+      displayManager = {
+        lightdm = {
+          enable = true;
+          greeters.slick = {
+            enable = true;
+            theme.name = "Zukitre-dark";
+          };
+        };
+      };
+      desktopManager = {
+        plasma5.enable = true;
+        xterm.enable = true;
+        xfce = {
+          enable = true;
+          noDesktop = false;
+          enableXfwm = true;
+          enableScreensaver = false;
+        };
+      };
+      #windowManager = {
+      #  i3.enable = true;
+      #};
+    };
+  };
+
+  services.displayManager.defaultSession = "plasma";
 }

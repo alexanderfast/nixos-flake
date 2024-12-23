@@ -100,7 +100,7 @@
 
     # needed by shell
     chroma
-    pygmentize
+    python311Packages.pygments
 
     # gnumake
     # cmake
