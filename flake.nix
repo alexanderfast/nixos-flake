@@ -83,22 +83,33 @@
         modules = [
           # > Our main nixos configuration file <
           ./nixos/nuc.nix
+
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            #home-manager.users.alex = {
+            #  #imports = [ ./hosts/nuc/home.nix ];
+            #  imports = [ ./home-manager/home.nix ];
+            #};
+            home-manager.users.alex = ./home-manager/home.nix;
+          }
         ];
       };
     };
 
-    # Standalone home-manager configuration entrypoint
-    # Available through 'home-manager --flake .#your-username@your-hostname'
-    homeConfigurations = {
-      "alex@work" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
-        extraSpecialArgs = {inherit inputs outputs;};
-        modules = [
-          # > Our main home-manager configuration file <
-          ./home-manager/home.nix
-        ];
-      };
-    };
+    ## Standalone home-manager configuration entrypoint
+    ## Available through 'home-manager --flake .#your-username@your-hostname'
+    #homeConfigurations = {
+    #  alex = home-manager.lib.homeManagerConfiguration {
+    #    pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+    #    extraSpecialArgs = {inherit inputs outputs;};
+    #    modules = [
+    #      # > Our main home-manager configuration file <
+    #      ./home-manager/home.nix
+    #    ];
+    #  };
+    #};
 
     # # NixOS configuration entrypoint
     # # Available through 'nixos-rebuild --flake .#your-hostname'
