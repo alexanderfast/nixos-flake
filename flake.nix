@@ -92,7 +92,7 @@
             #  #imports = [ ./hosts/nuc/home.nix ];
             #  imports = [ ./home-manager/home.nix ];
             #};
-            home-manager.users.alex = ./home-manager/home.nix;
+            home-manager.users.alex = ./home-manager/nuc.nix;
           }
         ];
       };
