@@ -76,6 +76,11 @@
         modules = [
           # > Our main nixos configuration file <
           ./nixos/configuration.nix
+          nix-ld.nixosModules.nix-ld
+          {
+            programs.nix-ld.enable = true;
+            programs.nix-ld.libraries = with nixpkgs; [ stdenv.cc.cc libz ];
+          }
         ];
       };
     };
