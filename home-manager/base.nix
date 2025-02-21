@@ -111,7 +111,7 @@
     cargo
     nil
     lua-language-server
-    pyright
+    # pyright
     shellcheck
     shfmt
     stylua
