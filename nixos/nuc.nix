@@ -16,6 +16,7 @@
     # Or modules from other flakes (such as nixos-hardware):
     # inputs.hardware.nixosModules.common-cpu-amd
     # inputs.hardware.nixosModules.common-ssd
+    inputs.nix-minecraft.nixosModules.minecraft-servers
 
     # You can also split up your configuration and import pieces of it here:
     # ./users.nix
@@ -47,6 +48,8 @@
       #     patches = [ ./change-hello-to-hi.patch ];
       #   });
       # })
+
+      inputs.nix-minecraft.overlay
     ];
     # Configure your nixpkgs instance
     config = {
@@ -321,4 +324,20 @@
   };
 
   services.displayManager.defaultSession = "plasma";
+
+  services.minecraft-servers = {
+    enable = true;
+    eula = true;
+    openFirewall = true;
+    #package = pkgs.minecraft-server-1-21-4;
+
+    servers = {
+      server1 = {
+        enable = true;
+        #serverProperties = {
+        #  server-port = 25565;
+        #};
+      };
+    };
+  };
 }

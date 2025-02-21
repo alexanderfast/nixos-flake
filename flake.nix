@@ -26,6 +26,11 @@
       url = "github:alexanderfast/gitlablistpy";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nix-minecraft = {
+      url = "github:Infinidoge/nix-minecraft";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, home-manager, nix-ld, gitlablistpy, ... }@inputs: let
