@@ -252,8 +252,10 @@
   # Enable the OpenSSH daemon.
   services.openssh = {
     enable = true;
-    forwardX11 = true;
-    settings.PasswordAuthentication = false;
+    settings = {
+      X11Forwarding = true;
+      PasswordAuthentication = false;
+    };
   };
 
   # Open ports in the firewall.
