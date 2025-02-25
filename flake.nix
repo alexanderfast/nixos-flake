@@ -3,8 +3,8 @@
 
   inputs = {
     # Nixpkgs
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
-    # nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    # nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
 
     # You can access packages and modules from different nixpkgs revs
     # at the same time. Here's an working example:
@@ -17,10 +17,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nix-ld = {
-      url = "github:Mic92/nix-ld";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # nix-ld = {
+    #   url = "github:Mic92/nix-ld";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
     gitlablistpy = {
       url = "github:alexanderfast/gitlablistpy";
@@ -33,7 +33,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, nix-ld, gitlablistpy, ... }@inputs: let
+  outputs = { self, nixpkgs, home-manager, gitlablistpy, ... }@inputs: let
     inherit (self) outputs;
     # Supported systems for your flake packages, shell, etc.
     systems = [
@@ -76,11 +76,11 @@
         modules = [
           # > Our main nixos configuration file <
           ./nixos/configuration.nix
-          nix-ld.nixosModules.nix-ld
-          {
-            programs.nix-ld.enable = true;
-            programs.nix-ld.libraries = with nixpkgs; [ stdenv.cc.cc libz ];
-          }
+          # nix-ld.nixosModules.nix-ld
+          # {
+          #   programs.nix-ld.enable = true;
+          #   programs.nix-ld.libraries = with nixpkgs; [ stdenv.cc.cc libz ];
+          # }
         ];
       };
     };

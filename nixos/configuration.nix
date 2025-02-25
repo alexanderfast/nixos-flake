@@ -155,8 +155,8 @@
   # };
   #
   # Configure console keymap
-  console.keyMap = "sv-latin1";
-  console.useXkbConfig = true;
+  # console.keyMap = "sv-latin1";
+  console.useXkbConfig = true; # sets keyboard config from xserver
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
@@ -252,6 +252,7 @@
   # Enable the OpenSSH daemon.
   services.openssh = {
     enable = true;
+    forwardX11 = true;
     settings.PasswordAuthentication = false;
   };
 
