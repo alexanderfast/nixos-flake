@@ -50,7 +50,23 @@
   # };
 
   # Add stuff for your user as you see fit:
-  # programs.neovim.enable = true;
+  programs.neovim = {
+    enable = true;
+    extraPackages = with pkgs; [
+      # Language server packages (executables)
+      # haskell-language-server
+      # sumneko-lua-language-server
+      # elmPackages.elm-language-server
+      # rust-analyzer
+      # pyright
+    ];
+  };
+
+  # programs.nix-ld = {
+  #   enable = true;
+  #   libraries = pkgs;
+  # }; 
+
   # home.packages = with pkgs; [ steam ];
 
   # Nicely reload system units when changing configs
@@ -87,6 +103,7 @@
     dos2unix
     xclip
     zoxide
+    nerdfonts
 
     xfce.xfce4-terminal
 

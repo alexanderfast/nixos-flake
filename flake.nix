@@ -17,10 +17,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nix-ld = {
-    #   url = "github:Mic92/nix-ld";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    nix-ld = {
+      url = "github:Mic92/nix-ld";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     gitlablistpy = {
       url = "github:alexanderfast/gitlablistpy";
@@ -33,7 +33,7 @@
     # };
   };
 
-  outputs = { self, nixpkgs, home-manager, gitlablistpy, ... }@inputs: let
+  outputs = { self, nixpkgs, home-manager, gitlablistpy, nix-ld, ... }@inputs: let
     inherit (self) outputs;
     # Supported systems for your flake packages, shell, etc.
     systems = [
@@ -121,6 +121,12 @@
             #};
             home-manager.users.alex = ./home-manager/home.nix;
           }
+
+          # nix-ld.nixosModules.nix-ld
+          # {
+          #   programs.nix-ld.enable = true;
+          #   programs.nix-ld.libraries = with nixpkgs; [ stdenv.cc.cc libz ];
+          # }
         ];
       };
     };
