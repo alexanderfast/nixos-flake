@@ -19,7 +19,7 @@
     # ./nvim.nix
   ];
 
-  #nixpkgs = {
+  nixpkgs = {
   #  # You can add overlays here
   #  overlays = [
   #    # Add overlays your own flake exports (from overlays and pkgs dir):
@@ -38,16 +38,16 @@
   #    # })
   #  ];
   #  # Configure your nixpkgs instance
-  #  config = {
-  #    # Disable if you don't want unfree packages
-  #    allowUnfree = true;
-  #  };
-  #};
-
-  home = {
-    username = "alex";
-    homeDirectory = "/home/alex";
+    config = {
+      # Disable if you don't want unfree packages
+      allowUnfree = true;
+    };
   };
+
+  # home = {
+  #   username = "alex";
+  #   homeDirectory = "/home/alex";
+  # };
 
   # Add stuff for your user as you see fit:
   # programs.neovim.enable = true;
@@ -57,7 +57,7 @@
   systemd.user.startServices = "sd-switch";
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  home.stateVersion = "23.05";
+  home.stateVersion = "24.11";
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
@@ -67,7 +67,7 @@
     # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
     # # fonts?
     # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
-    (nerdfonts.override { fonts = [ "Hack" ]; })
+    # (nerdfonts.override { fonts = [ "Hack" ]; })
 
     # # You can also create simple shell scripts directly inside your
     # # configuration. For example, this adds a command 'my-hello' to your
@@ -140,6 +140,10 @@
     remmina
     btop
   ];
+
+  # fonts.packages = [
+  #   nerd-fonts.hack
+  # ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.

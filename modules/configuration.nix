@@ -8,35 +8,15 @@
   pkgs,
   ...
 }: {
-  # You can import other NixOS modules here
-  imports = [
-    # If you want to use modules your own flake exports (from modules/nixos):
-    # outputs.nixosModules.example
-
-    # Or modules from other flakes (such as nixos-hardware):
-    # inputs.hardware.nixosModules.common-cpu-amd
-    # inputs.hardware.nixosModules.common-ssd
-
-    # You can also split up your configuration and import pieces of it here:
-    # ./users.nix
-
-    # Import your generated (nixos-generate-config) hardware configuration
-    ./hardware-configuration.nix
-
-    # ../../configuration.nix
-    ../modules/home-xfce4-i3.nix
-    ../modules/nvidia.nix
-    ../modules/bootgrub.nix
-  ];
 
   nixpkgs = {
     # You can add overlays here
     overlays = [
       # Add overlays your own flake exports (from overlays and pkgs dir):
-      outputs.overlays.additions
-      outputs.overlays.modifications
-      outputs.overlays.unstable-packages
-
+      # outputs.overlays.additions
+      # outputs.overlays.modifications
+      # outputs.overlays.unstable-packages
+      #
       # You can also add overlays exported from other flakes:
       # neovim-nightly-overlay.overlays.default
 
@@ -76,9 +56,6 @@
     # extraOptions = "experimental-features = nix-command flakes";
   };
 
-
-  networking.hostName = "work";
-
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -89,7 +66,7 @@
   networking.networkmanager.enable = true;
 
   # Disable suspend since it disrupts vpn connection
-  powerManagement.enable = false;
+  # powerManagement.enable = false;
 
   # Set your time zone.
   time.timeZone = "Europe/Stockholm";
@@ -158,8 +135,8 @@
   # console.keyMap = "sv-latin1";
   console.useXkbConfig = true; # sets keyboard config from xserver
 
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
+  # # Enable CUPS to print documents.
+  # services.printing.enable = true;
 
   # Enable sound with pipewire.
   # sound.enable = true;
@@ -179,17 +156,17 @@
   #   #media-session.enable = true;
   # };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.alex = {
-    isNormalUser = true;
-    description = "Alex";
-    extraGroups = [ "networkmanager" "wheel" "camera" "video" "audio" "lp" ];
-    #packages = with pkgs; [
-    #  firefox
-    #  kate
-    #  thunderbird
-    #];
-  };
+  # # Define a user account. Don't forget to set a password with ‘passwd’.
+  # users.users.alex = {
+  #   isNormalUser = true;
+  #   description = "Alex";
+  #   extraGroups = [ "networkmanager" "wheel" "camera" "video" "audio" "lp" ];
+  #   #packages = with pkgs; [
+  #   #  firefox
+  #   #  kate
+  #   #  thunderbird
+  #   #];
+  # };
 
 
   # List packages installed in system profile. To search, run:
@@ -214,7 +191,6 @@
   ];
 
   programs.zsh.enable = true;
-  users.users.alex.shell = pkgs.zsh;
 
   #xdg = {
   #  portal = {
@@ -272,7 +248,7 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   #
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  system.stateVersion = "23.11"; # Did you read the comment?
+  system.stateVersion = "24.11"; # Did you read the comment?
 
   hardware.keyboard.zsa.enable = true;
 
