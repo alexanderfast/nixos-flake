@@ -31,19 +31,6 @@
 
   environment.systemPackages = with pkgs; [ brightnessctl ];
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.alex = {
-    isNormalUser = true;
-    description = "Alex";
-    extraGroups = [ "networkmanager" "wheel" "camera" "video" "audio" "lp" ];
-    # shell = pkgs.zsh;
-    #packages = with pkgs; [
-    #  firefox
-    #  kate
-    #  thunderbird
-    #];
-  };
-
 
   # networking.wg-quick.interfaces = {
   #   wg0 = {

@@ -156,41 +156,14 @@
   #   #media-session.enable = true;
   # };
 
-  # # Define a user account. Don't forget to set a password with ‘passwd’.
-  # users.users.alex = {
-  #   isNormalUser = true;
-  #   description = "Alex";
-  #   extraGroups = [ "networkmanager" "wheel" "camera" "video" "audio" "lp" ];
-  #   #packages = with pkgs; [
-  #   #  firefox
-  #   #  kate
-  #   #  thunderbird
-  #   #];
-  # };
-
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    neovim
-    htop
-    wget
-    curl
-    tmux
-    killall
-    i3
-    zsh
-    parted
-    tree
-    jq
-    ripgrep
-    git
-    starship
-    home-manager
-    fzf
+    # zsh
+    # neovim
   ];
 
-  programs.zsh.enable = true;
 
   #xdg = {
   #  portal = {
@@ -252,7 +225,20 @@
 
   hardware.keyboard.zsa.enable = true;
 
-  # # Enable home-manager and git
+  # # # Enable home-manager and git
   # programs.home-manager.enable = true;
-  # programs.git.enable = true;
+  programs.git.enable = true;
+  programs.zsh.enable = true;
+
+  users.users.alex = {
+    isNormalUser = true;
+    description = "Alex";
+    extraGroups = [ "networkmanager" "wheel" "camera" "video" "audio" "lp" ];
+    shell = pkgs.zsh;
+    #packages = with pkgs; [
+    #  firefox
+    #  kate
+    #  thunderbird
+    #];
+  };
 }

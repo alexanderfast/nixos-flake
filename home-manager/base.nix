@@ -92,18 +92,30 @@
     #   echo "Hello, ${config.home.username}!"
     # '')
 
+    curl
+    dos2unix
+    fzf
     git
     git-lfs
+    home-manager
+    htop
+    i3
+    jq
+    killall
     kitty
+    # neovim
+    nerdfonts
     openconnect
+    parted
+    ripgrep
     starship
     tmux
-    fzf
+    tree
     unzip
-    dos2unix
+    wget
     xclip
     zoxide
-    nerdfonts
+    zsh
 
     xfce.xfce4-terminal
 
@@ -156,6 +168,7 @@
     shutter
     remmina
     btop
+    i3
   ];
 
   # fonts.packages = [
@@ -229,5 +242,7 @@
     };
 
     zsh.enable = true;
+    git.enable = true;
+    starship.enable = true;
   };
 }

@@ -29,6 +29,7 @@
     #../modules/home-xfce4-i3.nix
     #../modules/nvidia.nix
     ../modules/bootgrub.nix
+    ../modules/configuration.nix
   ];
 
   nixpkgs = {
@@ -183,19 +184,6 @@
   #   #media-session.enable = true;
   # };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.alex = {
-    isNormalUser = true;
-    description = "Alex";
-    extraGroups = [ "networkmanager" "wheel" "camera" "video" "audio" "lp" ];
-    #packages = with pkgs; [
-    #  firefox
-    #  kate
-    #  thunderbird
-    #];
-  };
-
-
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -212,13 +200,12 @@
     jq
     ripgrep
     git
-    starship
+    # starship
     home-manager
     fzf
   ];
 
   programs.zsh.enable = true;
-  users.users.alex.shell = pkgs.zsh;
 
   #xdg = {
   #  portal = {

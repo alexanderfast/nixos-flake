@@ -68,7 +68,6 @@
     # These are usually stuff you would upstream into home-manager
     homeManagerModules = import ./modules/home-manager;
 
-
     # NixOS configuration entrypoint
     # Available through 'nixos-rebuild --flake .#your-hostname'
     nixosConfigurations = {
@@ -76,12 +75,18 @@
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./nixos/configuration.nix
+          ./hosts/work/default.nix
           # nix-ld.nixosModules.nix-ld
           # {
           #   programs.nix-ld.enable = true;
           #   programs.nix-ld.libraries = with nixpkgs; [ stdenv.cc.cc libz ];
           # }
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.alex = ./home-manager/home.nix;
+          }
         ];
       };
 
@@ -95,10 +100,6 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            #home-manager.users.alex = {
-            #  #imports = [ ./hosts/nuc/home.nix ];
-            #  imports = [ ./home-manager/home.nix ];
-            #};
             home-manager.users.alex = ./home-manager/nuc.nix;
           }
         ];
@@ -107,7 +108,6 @@
       laptop = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
-
           # > Our main nixos configuration file <
           ./hosts/laptop/default.nix
 
@@ -115,10 +115,6 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            #home-manager.users.alex = {
-            #  #imports = [ ./hosts/nuc/home.nix ];
-            #  imports = [ ./home-manager/home.nix ];
-            #};
             home-manager.users.alex = ./home-manager/home.nix;
           }
 
@@ -131,56 +127,7 @@
       };
     };
 
-    ## Standalone home-manager configuration entrypoint
-    ## Available through 'home-manager --flake .#your-username@your-hostname'
-    #homeConfigurations = {
-    #  alex = home-manager.lib.homeManagerConfiguration {
-    #    pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
-    #    extraSpecialArgs = {inherit inputs outputs;};
-    #    modules = [
-    #      # > Our main home-manager configuration file <
-    #      ./home-manager/home.nix
-    #    ];
-    #  };
-    #};
-
-    # # NixOS configuration entrypoint
-    # # Available through 'nixos-rebuild --flake .#your-hostname'
-    # nixosConfigurations = {
-    #   work = nixpkgs.lib.nixosSystem {
-    #     inherit system;
-    #     modules = [
-    #       ./hosts/work
-    #       home-manager.nixosModules.home-manager
-    #       {
-    #         home-manager.useGlobalPkgs = true;
-    #         home-manager.useUserPackages = true;
-    #         home-manager.users.alex = {
-    #           imports = [ ./hosts/work/home.nix ];
-    #         };
-    #       }
-    #       nix-ld.nixosModules.nix-ld
-    #       {
-    #         programs.nix-ld.enable = true;
-    #         programs.nix-ld.libraries = with pkgs; [ stdenv.cc.cc libz ];
-    #       }
-    #       {
-    #         # # TODO: move to home manager
-    #         # environment.systemPackages =
-    #         #   [ gitlablistpy.packages.${system}.default ];
-    #       }
-    #     ];
-    #   };
-    #
-    # homeManagerConfigurations = {
-    #   alex = home-manager.lib.homeManagerConfiguration {
-    #     #inherit system pkgs;
-    #     pkgs = nixpkgs.legacyPackages.${system};
-    #     modules = [ ./home-base.nix ];
-    #   };
-    # };
-
-  #   devShells.x86_64-linux.default =
-  #     packages.mkShell { packages = with packages; [ nixfmt ]; };
+    # devShells.x86_64-linux.default =
+    #   packages.mkShell { packages = with packages; [ nixfmt ]; };
   };
 }
