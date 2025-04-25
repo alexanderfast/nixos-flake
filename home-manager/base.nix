@@ -149,6 +149,8 @@
     jsonfmt
     bat
     vscode-langservers-extracted
+    zig
+    tree-sitter
 
     wally-cli
     lazygit
@@ -169,6 +171,7 @@
     remmina
     btop
     i3
+    keymapp
   ];
 
   # fonts.packages = [
