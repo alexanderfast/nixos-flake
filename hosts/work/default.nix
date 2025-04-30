@@ -10,4 +10,11 @@
   ];
 
   networking.hostName = "work";
+
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      cmake
+    ];
+  };
 }

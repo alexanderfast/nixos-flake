@@ -76,11 +76,6 @@
         modules = [
           # > Our main nixos configuration file <
           ./hosts/work/default.nix
-          # nix-ld.nixosModules.nix-ld
-          # {
-          #   programs.nix-ld.enable = true;
-          #   programs.nix-ld.libraries = with nixpkgs; [ stdenv.cc.cc libz ];
-          # }
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -95,7 +90,6 @@
         modules = [
           # > Our main nixos configuration file <
           ./nixos/nuc.nix
-
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -110,19 +104,12 @@
         modules = [
           # > Our main nixos configuration file <
           ./hosts/laptop/default.nix
-
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.alex = ./home-manager/home.nix;
           }
-
-          # nix-ld.nixosModules.nix-ld
-          # {
-          #   programs.nix-ld.enable = true;
-          #   programs.nix-ld.libraries = with nixpkgs; [ stdenv.cc.cc libz ];
-          # }
         ];
       };
     };

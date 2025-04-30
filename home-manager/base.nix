@@ -62,11 +62,6 @@
     ];
   };
 
-  # programs.nix-ld = {
-  #   enable = true;
-  #   libraries = pkgs;
-  # }; 
-
   # home.packages = with pkgs; [ steam ];
 
   # Nicely reload system units when changing configs
