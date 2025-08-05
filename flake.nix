@@ -27,10 +27,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nix-minecraft = {
-    #   url = "github:Infinidoge/nix-minecraft";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    nix-minecraft = {
+      url = "github:Infinidoge/nix-minecraft";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, home-manager, gitlablistpy, nix-ld, ... }@inputs: let
