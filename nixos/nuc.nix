@@ -114,11 +114,11 @@
     LC_TIME = "sv_SE.UTF-8";
   };
 
-  services.qbittorrent = {
-    enable = true;
-    openFirewall = true;
-    port = 8080;
-  };
+  # services.qbittorrent = {
+  #   enable = true;
+  #   openFirewall = true;
+  #   port = 8080;
+  # };
 
   # Enable the X11 windowing system.
   #services.xserver.enable = true;
@@ -203,6 +203,7 @@
     # starship
     home-manager
     fzf
+    qbittorrent
   ];
 
   programs.zsh.enable = true;
@@ -260,7 +261,7 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   #
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  system.stateVersion = "23.11"; # Did you read the comment?
+  system.stateVersion = "24.11"; # Did you read the comment?
 
   hardware.keyboard.zsa.enable = true;
 
