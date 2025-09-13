@@ -31,6 +31,7 @@
     ../modules/bootgrub.nix
     ../modules/configuration.nix
     ../modules/openhab.nix
+    ../modules/jellyfin.nix
   ];
 
   nixpkgs = {

@@ -13,17 +13,10 @@
   networking.hostName = "nuc";
 
   environment.systemPackages = [
-    pkgs.jellyfin
-    pkgs.jellyfin-web
-    pkgs.jellyfin-ffmpeg
     pkgs.wireguard-tools
     # pkgs.mosh
   ];
 
-  services.jellyfin = {
-    enable = true;
-    openFirewall = true;
-  };
 
   services.xrdp.enable = true;
   services.xrdp.defaultWindowManager = "startplasma-x11";
