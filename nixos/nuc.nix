@@ -32,6 +32,7 @@
     ../modules/configuration.nix
     ../modules/openhab.nix
     ../modules/jellyfin.nix
+    ../modules/dnsmasq.nix
   ];
 
   nixpkgs = {
@@ -206,6 +207,7 @@
     home-manager
     fzf
     qbittorrent
+    dig
   ];
 
   programs.zsh.enable = true;
