@@ -30,6 +30,7 @@
     #../modules/nvidia.nix
     ../modules/bootgrub.nix
     ../modules/configuration.nix
+    ../modules/openhab.nix
   ];
 
   nixpkgs = {

@@ -167,6 +167,8 @@
     btop
     i3
     keymapp
+
+    docker-compose
   ];
 
   # fonts.packages = [
