@@ -265,7 +265,7 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   #
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  system.stateVersion = "24.11"; # Did you read the comment?
+  system.stateVersion = "25.05"; # Did you read the comment?
 
   hardware.keyboard.zsa.enable = true;
 
@@ -300,7 +300,7 @@
         };
       };
       desktopManager = {
-        plasma5.enable = true;
+        plasma6.enable = true;
         xterm.enable = true;
         xfce = {
           enable = true;

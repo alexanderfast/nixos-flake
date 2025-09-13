@@ -68,7 +68,7 @@
   systemd.user.startServices = "sd-switch";
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  home.stateVersion = "24.11";
+  home.stateVersion = "25.05";
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
@@ -99,7 +99,7 @@
     killall
     kitty
     # neovim
-    nerdfonts
+    nerd-fonts.hack
     openconnect
     parted
     ripgrep
