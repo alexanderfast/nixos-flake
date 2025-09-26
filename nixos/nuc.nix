@@ -210,8 +210,6 @@
     dig
   ];
 
-  programs.zsh.enable = true;
-
   #xdg = {
   #  portal = {
   #    enable = true;
