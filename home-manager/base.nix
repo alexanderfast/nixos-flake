@@ -167,6 +167,7 @@
     btop
     i3
     keymapp
+    stow
 
     docker-compose
   ];
@@ -178,39 +179,39 @@
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
   home.file = {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
-
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
-
-    ".config/dunst".source = config.lib.file.mkOutOfStoreSymlink
-      "/home/${config.home.username}/.dotfiles/dunst";
-    ".config/i3".source = config.lib.file.mkOutOfStoreSymlink
-      "/home/${config.home.username}/.dotfiles/i3";
-    ".config/kitty".source = config.lib.file.mkOutOfStoreSymlink
-      "/home/${config.home.username}/.dotfiles/kitty";
-    ".config/nvim".source = config.lib.file.mkOutOfStoreSymlink
-      "/home/${config.home.username}/.dotfiles/nvim";
-    ".config/picom".source = config.lib.file.mkOutOfStoreSymlink
-      "/home/${config.home.username}/.dotfiles/picom";
-    ".config/rofi".source = config.lib.file.mkOutOfStoreSymlink
-      "/home/${config.home.username}/.dotfiles/rofi";
-    ".tmux.conf".source = config.lib.file.mkOutOfStoreSymlink
-      "/home/${config.home.username}/.dotfiles/tmux/tmux.conf";
-    ".tmux".source = config.lib.file.mkOutOfStoreSymlink
-      "/home/${config.home.username}/.dotfiles/tmux";
-    ".oh-my-zsh".source = config.lib.file.mkOutOfStoreSymlink
-      "/home/${config.home.username}/.dotfiles/ohmyzsh";
-    ".zshenv".source = config.lib.file.mkOutOfStoreSymlink
-      "/home/${config.home.username}/.dotfiles/zsh/zshenv";
-    ".zshrc".source = config.lib.file.mkOutOfStoreSymlink
-      "/home/${config.home.username}/.dotfiles/zsh/zshrc";
+  #   # # Building this configuration will create a copy of 'dotfiles/screenrc' in
+  #   # # the Nix store. Activating the configuration will then make '~/.screenrc' a
+  #   # # symlink to the Nix store copy.
+  #   # ".screenrc".source = dotfiles/screenrc;
+  #
+  #   # # You can also set the file content immediately.
+  #   # ".gradle/gradle.properties".text = ''
+  #   #   org.gradle.console=verbose
+  #   #   org.gradle.daemon.idletimeout=3600000
+  #   # '';
+  #
+  #   ".config/dunst".source = config.lib.file.mkOutOfStoreSymlink
+  #     "/home/${config.home.username}/.dotfiles/dunst";
+  #   ".config/i3".source = config.lib.file.mkOutOfStoreSymlink
+  #     "/home/${config.home.username}/.dotfiles/i3";
+  #   ".config/kitty".source = config.lib.file.mkOutOfStoreSymlink
+  #     "/home/${config.home.username}/.dotfiles/kitty";
+  #   ".config/nvim".source = config.lib.file.mkOutOfStoreSymlink
+  #     "/home/${config.home.username}/.dotfiles/nvim";
+  #   ".config/picom".source = config.lib.file.mkOutOfStoreSymlink
+  #     "/home/${config.home.username}/.dotfiles/picom";
+  #   ".config/rofi".source = config.lib.file.mkOutOfStoreSymlink
+  #     "/home/${config.home.username}/.dotfiles/rofi";
+  #   ".tmux.conf".source = config.lib.file.mkOutOfStoreSymlink
+  #     "/home/${config.home.username}/.dotfiles/tmux/tmux.conf";
+  #   ".tmux".source = config.lib.file.mkOutOfStoreSymlink
+  #     "/home/${config.home.username}/.dotfiles/tmux";
+  #   ".oh-my-zsh".source = config.lib.file.mkOutOfStoreSymlink
+  #     "/home/${config.home.username}/.dotfiles/ohmyzsh";
+      ".zshenv".source = config.lib.file.mkOutOfStoreSymlink
+        "/home/${config.home.username}/.dotfiles/.zshenv";
+      ".zshrc".source = config.lib.file.mkOutOfStoreSymlink
+        "/home/${config.home.username}/.dotfiles/.zshrc";
   };
 
   #xdg.configFile."i3".source = ./.dotfiles/i3;
