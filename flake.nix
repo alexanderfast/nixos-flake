@@ -75,12 +75,12 @@
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./hosts/work/default.nix
+          ./nixos/work.nix
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.alex = ./home-manager/home.nix;
+            home-manager.users.alex = ./home-manager/work.nix;
           }
         ];
       };
