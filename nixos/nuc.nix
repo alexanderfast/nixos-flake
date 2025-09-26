@@ -27,7 +27,7 @@
 
     # ../../configuration.nix
     #../modules/home-xfce4-i3.nix
-    #../modules/nvidia.nix
+    ../modules/nvidia.nix
     ../modules/bootgrub.nix
     ../modules/configuration.nix
     ../modules/openhab.nix
