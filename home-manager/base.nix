@@ -100,6 +100,7 @@
     kitty
     # neovim
     nerd-fonts.hack
+    nerd-fonts.fira-code
     openconnect
     parted
     ripgrep
