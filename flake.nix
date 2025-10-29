@@ -22,23 +22,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    gitlablistpy = {
-      url = "github:alexanderfast/gitlablistpy";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nix-minecraft = {
-      url = "github:Infinidoge/nix-minecraft";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    ghostty = {
-      url = "github:ghostty-org/ghostty";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # gitlablistpy = {
+    #   url = "github:alexanderfast/gitlablistpy";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    #
+    # nix-minecraft = {
+    #   url = "github:Infinidoge/nix-minecraft";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
-  outputs = { self, nixpkgs, home-manager, gitlablistpy, nix-ld, ... }@inputs: let
+  outputs = { self, nixpkgs, home-manager, nix-ld, ... }@inputs: let
     inherit (self) outputs;
     # Supported systems for your flake packages, shell, etc.
     systems = [
