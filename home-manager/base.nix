@@ -146,6 +146,8 @@
     vscode-langservers-extracted
     zig
     tree-sitter
+    gcc
+    nixfmt-rfc-style
 
     wally-cli
     lazygit

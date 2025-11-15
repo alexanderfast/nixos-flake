@@ -24,6 +24,7 @@
     # Import your generated (nixos-generate-config) hardware configuration
     # ./hardware-configuration.nix
     ../hosts/nuc/hardware.nix
+    ../modules/configuration.nix
 
     # ../../configuration.nix
     #../modules/home-xfce4-i3.nix
@@ -120,8 +121,61 @@
   # services.qbittorrent = {
   #   enable = true;
   #   openFirewall = true;
-  #   port = 8080;
+  #   port = 8081;
   # };
+
+  # # Make sure firewall allows qBittorrent web UI
+  # networking.firewall = {
+  #   enable = true;
+  #   allowedTCPPorts = [ 8081 ]; # qBittorrent web UI port (change if you want)
+  # };
+
+  # qBittorrent system service
+  services.qbittorrent = {
+    enable = true;
+    # qBittorrent runs as a user; usually better to dedicate a user
+    user = "torrent";
+    group = "torrent";
+
+    webuiPort = 8081;
+    openFirewall = true;
+
+    # Where qBittorrent stores its profile/config (includes qBittorrent.conf)
+    profileDir = "/srv/torrent";
+
+    # This maps directly to qBittorrent.conf
+    serverConfig = {
+      # This avoids the “first run” legal notice prompt
+      LegalNotice.Accepted = true;
+
+      Preferences = {
+        WebUI = {
+          # Listen on all interfaces so you can access from another machine
+          Address = "0.0.0.0";
+          Port = 8081;
+
+          # Optional: set username here
+          Username = "admin";
+
+          # Optional: set a PBKDF2 password hash here.
+          # If you leave this out, qBittorrent will generate a temporary password
+          # and print it in the logs (journalctl -u torrent).
+          # Password_PBKDF2 = "<PBKDF2 hash>";
+        };
+      };
+    };
+  };
+
+  # Create user + group for qBittorrent
+  users = {
+    groups.torrent = { };
+    users.torrent = {
+      isSystemUser = true;
+      group = "torrent";
+      home = "/srv/torrent";
+      createHome = true;
+    };
+  };
 
   # Enable the X11 windowing system.
   #services.xserver.enable = true;
@@ -315,19 +369,19 @@
 
   services.displayManager.defaultSession = "plasma";
 
-  services.minecraft-servers = {
-    enable = true;
-    eula = true;
-    openFirewall = true;
-    #package = pkgs.minecraft-server-1-21-4;
-
-    servers = {
-      server1 = {
-        enable = true;
-        #serverProperties = {
-        #  server-port = 25565;
-        #};
-      };
-    };
-  };
+  # services.minecraft-servers = {
+  #   enable = true;
+  #   eula = true;
+  #   openFirewall = true;
+  #   #package = pkgs.minecraft-server-1-21-4;
+  #
+  #   servers = {
+  #     server1 = {
+  #       enable = true;
+  #       #serverProperties = {
+  #       #  server-port = 25565;
+  #       #};
+  #     };
+  #   };
+  # };
 }

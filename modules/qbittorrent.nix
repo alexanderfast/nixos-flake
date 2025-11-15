@@ -38,7 +38,7 @@ in
 
     port = mkOption {
       type = types.port;
-      default = 8080;
+      default = 8081;
       description = lib.mdDoc ''
         qBittorrent web UI port.
       '';
