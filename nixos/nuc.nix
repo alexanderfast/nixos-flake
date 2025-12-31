@@ -28,7 +28,7 @@
 
     # ../../configuration.nix
     #../modules/home-xfce4-i3.nix
-    ../modules/nvidia.nix
+    # ../modules/nvidia.nix
     ../modules/bootgrub.nix
     ../modules/configuration.nix
     ../modules/openhab.nix
@@ -262,6 +262,7 @@
     fzf
     qbittorrent
     dig
+    pciutils
   ];
 
   #xdg = {
@@ -325,6 +326,7 @@
   # programs.home-manager.enable = true;
   # programs.git.enable = true;
   services = {
+    resolved.enable = true;
     blueman.enable = true;
     gnome.gnome-keyring.enable = true;
     pipewire = {
@@ -364,8 +366,11 @@
       #windowManager = {
       #  i3.enable = true;
       #};
+      videoDrivers = [ "modesetting" ];
     };
   };
+
+  hardware.opengl.enable = true;
 
   services.displayManager.defaultSession = "plasma";
 
