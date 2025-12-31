@@ -263,6 +263,8 @@
     qbittorrent
     dig
     pciutils
+
+    jellyflix
   ];
 
   #xdg = {
