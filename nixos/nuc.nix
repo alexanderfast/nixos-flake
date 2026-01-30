@@ -329,7 +329,6 @@
   # programs.home-manager.enable = true;
   # programs.git.enable = true;
   services = {
-    resolved.enable = true;
     blueman.enable = true;
     gnome.gnome-keyring.enable = true;
     pipewire = {

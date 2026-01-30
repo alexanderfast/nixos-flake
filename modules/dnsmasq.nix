@@ -1,14 +1,30 @@
 { config, pkgs, ... }:
 {
+  services.resolved.enable = false;
+
+  networking.resolvconf.enable = true;
+
+  networking.nameservers = [
+    "127.0.0.1"
+    "1.1.1.1"
+    "8.8.8.8"
+  ];
+
   services.dnsmasq = {
     enable = true;
 
     settings = {
+      # Run dnsmasq on a non-standard port to avoid systemd-resolved
+      port = 53;
+
       # interface = [ "enp86s0" ];
       # bind-interface = "true";
 
       # Forward everything else to your ISP or preferred DNS
-      server = [ "1.1.1.1" "8.8.8.8" ];
+      server = [
+        "192.168.1.1"
+        "8.8.8.8"
+      ];
 
       # Add your custom names here
       address = [
