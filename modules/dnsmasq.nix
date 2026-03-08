@@ -22,8 +22,9 @@
 
       # Forward everything else to your ISP or preferred DNS
       server = [
-        "192.168.1.1"
-        "8.8.8.8"
+        #"192.168.1.1"
+        #"8.8.8.8"
+        "9.9.9.9"
       ];
 
       # Add your custom names here
