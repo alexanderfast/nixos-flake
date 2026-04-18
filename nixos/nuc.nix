@@ -253,6 +253,7 @@
     i3
     zsh
     parted
+    btrfs-progs
     tree
     jq
     ripgrep
@@ -375,6 +376,11 @@
   hardware.opengl.enable = true;
 
   services.displayManager.defaultSession = "plasma";
+
+  services.btrfs.autoScrub = {
+    enable = true;
+    fileSystems = [ "/mnt/sda" ];
+  };
 
   # services.minecraft-servers = {
   #   enable = true;

@@ -27,6 +27,12 @@
     [ { device = "/dev/disk/by-uuid/28dbcb46-7f8d-442c-a3f2-d2ee8310d573"; }
     ];
 
+  fileSystems."/mnt/sda" = {
+    device = "/dev/sda";
+    fsType = "btrfs";
+    options = [ "defaults" "nofail" "compress=zstd" ];
+  };
+
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
   # still possible to use this option, but it's recommended to use it in conjunction

@@ -211,10 +211,10 @@
   #     "/home/${config.home.username}/.dotfiles/tmux";
   #   ".oh-my-zsh".source = config.lib.file.mkOutOfStoreSymlink
   #     "/home/${config.home.username}/.dotfiles/ohmyzsh";
-      ".zshenv".source = config.lib.file.mkOutOfStoreSymlink
-        "/home/${config.home.username}/.dotfiles/.zshenv";
-      ".zshrc".source = config.lib.file.mkOutOfStoreSymlink
-        "/home/${config.home.username}/.dotfiles/.zshrc";
+      # ".zshenv".source = config.lib.file.mkOutOfStoreSymlink
+      #   "/home/${config.home.username}/.dotfiles/.zshenv";
+      # ".zshrc".source = config.lib.file.mkOutOfStoreSymlink
+      #   "/home/${config.home.username}/.dotfiles/.zshrc";
   };
 
   #xdg.configFile."i3".source = ./.dotfiles/i3;
