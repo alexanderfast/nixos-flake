@@ -233,7 +233,7 @@
   users.users.alex = {
     isNormalUser = true;
     description = "Alex";
-    extraGroups = [ "networkmanager" "wheel" "camera" "video" "render" "audio" "lp" ];
+    extraGroups = [ "networkmanager" "wheel" "camera" "video" "render" "audio" "lp" "torrent" ];
     shell = pkgs.zsh;
     #packages = with pkgs; [
     #  firefox

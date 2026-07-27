@@ -10,6 +10,11 @@
 
   users.users.jellyfin.extraGroups = [ "render" ];
 
+  systemd.services.jellyfin.unitConfig = {
+    After = [ "mnt-sda.mount" ];
+    Wants = [ "mnt-sda.mount" ];
+  };
+
   systemd.services.jellyfin.environment = {
     JELLYFIN_FFMPEG = "${pkgs.ffmpeg}/bin/ffmpeg";
     LIBVA_DRIVER_NAME = "iHD";
