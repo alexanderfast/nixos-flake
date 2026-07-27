@@ -98,7 +98,7 @@
   # Enable networking
   networking.networkmanager.enable = true;
 
-  # Disable suspend since it disrupts vpn connection
+  # Do not suspend: always-on server (DNS, openHAB, Jellyfin)
   powerManagement.enable = false;
 
   # Set your time zone.
