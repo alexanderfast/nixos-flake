@@ -34,6 +34,7 @@
     ../modules/openhab.nix
     ../modules/jellyfin.nix
     ../modules/dnsmasq.nix
+    ../modules/tailscale.nix
   ];
 
   nixpkgs = {
