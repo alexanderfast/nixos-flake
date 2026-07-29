@@ -15,6 +15,5 @@
 
   home.packages = with pkgs; [
     stepmania
-    claude-code
   ];
 }
