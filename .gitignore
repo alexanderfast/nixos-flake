@@ -1,1 +1,7 @@
 .direnv
+
+# Claude Code is installed out-of-flake via npm (see MEMORY.md); these are
+# byproducts of that install and are not part of the configuration.
+node_modules/
+package.json
+package-lock.json
