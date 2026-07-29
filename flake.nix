@@ -1,5 +1,5 @@
 {
-  description = "A very basic flake";
+  description = "NixOS and home-manager configuration for alex's hosts (nuc, work, laptop)";
 
   inputs = {
     # Nixpkgs
