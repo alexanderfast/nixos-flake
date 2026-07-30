@@ -5,7 +5,7 @@ and reverted automatically if the box does not come back healthy.
 
 | file | role | privilege |
 |---|---|---|
-| `nuc-verify` | 22 read-only health checks; decides "is the box working" | none |
+| `nuc-verify` | 24 read-only health checks; decides "is the box working" | none |
 | `nuc-rebuild` | build → arm watchdog → test → verify → switch or revert | root |
 | `../modules/nuc-rebuild-sudo.nix` | NOPASSWD sudo for the wrapper only | — |
 
@@ -15,13 +15,41 @@ change to the repo does not silently change what runs as root.
 
 ## Why it is shaped this way
 
-The nuc is reached over SSH and serves household DNS (dnsmasq), home automation
-(openHAB) and media (Jellyfin). A bad activation can therefore remove the very
-access needed to undo it, and affects people other than the operator.
+The nuc serves household DNS (dnsmasq), home automation (openHAB) and media
+(Jellyfin), so a bad activation affects people other than the operator.
+
+It can also remove the access needed to undo itself, but **not via SSH**. The
+agent that drives this loop is a `claude rc` process in a detached tmux session
+on the nuc, reached from the desktop app through Anthropic's servers. Its
+dependency chain is:
+
+```
+claude.exe  in  user.slice/user-1000.slice/user@1000.service/tmux-spawn-….scope
+   ├── resolves api.anthropic.com via dnsmasq on 127.0.0.1
+   └── outbound tcp/443
+```
+
+Three consequences:
+
+* **dnsmasq is inside the control path.** The box's own DNS server is one of the
+  services under management, so breaking it severs the agent's ability to
+  reconnect and therefore to revert.
+* **`user@1000.service` is inside the control path.** If an activation restarts
+  it, the agent session dies and does **not** come back by itself — someone has
+  to start `claude rc` on the nuc again. Note `home-manager/base.nix` sets
+  `systemd.user.startServices = "sd-switch"`, so user units are touched on switch.
+* **sshd is not the agent's lifeline.** It remains the *operator's* recovery path
+  from the desktop, which is why it is still asserted, but breaking it does not
+  cut the agent off.
+
+Because the agent's own recovery is less automatic than an SSH session's — a
+dropped SSH can simply be redialled, a dead tmux scope cannot — the dead-man's
+switch matters more here, not less.
 
 So `nuc-rebuild` never activates without first arming a **dead-man's switch**: a
-transient systemd timer, independent of the calling SSH session, that restores
-the previous generation if the script dies, hangs, or the box stops responding.
+transient systemd timer, owned by PID 1 and independent of the calling session,
+that restores the previous generation if the script dies, hangs, or the box stops
+responding.
 Activation is done with `nixos-rebuild test`, which does **not** touch the boot
 default, so the previous generation stays the one that boots until verification
 has passed.
@@ -89,16 +117,22 @@ Every run appends to `/var/log/nuc-rebuild.log`.
 
 If a rebuild goes wrong, in order:
 
-1. **Do nothing for `--watchdog` minutes.** The timer restores the previous
-   generation on its own. Check it is armed with
+1. **Do nothing for `--watchdog` minutes.** The timer is a transient systemd unit
+   and does not depend on the agent, the tmux session, or any network path. It
+   restores the previous generation on its own. Confirm it is armed with
    `systemctl list-timers nuc-rebuild-watchdog.timer`.
-2. **Revert by hand**, if SSH still works:
-   `sudo nixos-rebuild switch --rollback`
+2. **SSH in from the desktop** and revert by hand:
+   `sudo nixos-rebuild switch --rollback`. This is the operator's path, and it
+   works even when the agent is cut off.
 3. **Tailscale**, if the LAN path is broken but the tailnet is up — this is why
    `nuc-verify` asserts `BackendState=Running`, so the out-of-band path is known
    good *before* anything is activated.
 4. **Physical console.** The boot default is only changed after verification
    passes, so a power-cycle returns to the last known-good generation.
+
+If the agent goes silent but the box is healthy, the likely cause is
+`user@1000.service` or the tmux scope being restarted. Nothing auto-recovers
+that: SSH in and start `claude rc` again.
 
 ## Threat model, stated plainly
 
@@ -117,9 +151,9 @@ reviewable, the wrapper is fixed and root-owned, and every run is logged.
 ## Recommended prerequisite
 
 Card #6 on the NUC board — no SSH keys are declared in the flake while
-`PasswordAuthentication = false`. Authorised keys are currently un-versioned
-local state. Declaring them makes remote access reproducible, which is worth
-having in place *before* leaning on unattended rebuilds.
+`PasswordAuthentication = false`, so authorised keys are un-versioned local
+state. This is not the agent's lifeline, but it *is* recovery step 2 above, so
+it is worth making reproducible before leaning on unattended rebuilds.
 
 ## What `nuc-verify` checks
 
@@ -137,6 +171,9 @@ having in place *before* leaning on unattended rebuilds.
     and store hashes are normalised, so varying values are not false positives)
 11. sshd accepts a TCP connection
 12. `tailscale status` reports `BackendState=Running`
+13. the agent control path works: `api.anthropic.com` resolves via dnsmasq and
+    accepts a tcp/443 connection (fail-closed by design)
+14. `user@1000.service` is active -- the slice the agent session lives in
 
 Verified to have teeth: requiring a nonexistent unit, an unlistened port, a
 wrong DNS answer, and an injected `logger -p user.err` entry were each caught.

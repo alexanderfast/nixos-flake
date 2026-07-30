@@ -58,6 +58,13 @@ LOCAL_NAME=nuc.lan
 LOCAL_NAME_EXPECT=192.168.1.101
 EXTERNAL_NAME=example.com
 REQUIRED_MOUNT=/mnt/sda
+# Outbound reachability. This is the agent control path: claude-code runs in a
+# tmux scope under user@1000.service and reaches the API over 443, resolving it
+# through dnsmasq on 127.0.0.1 -- so the box's own DNS server is inside the
+# control path. Deliberately fail-closed: if this cannot be confirmed we would
+# also be unable to confirm anything else, so reverting is the safe default.
+CONTROL_HOST=api.anthropic.com
+CONTROL_PORT=443
 
 pass=0; fail=0; results=()
 say() { [ "$QUIET" = 1 ] || printf '%s\n' "$*"; }
@@ -163,6 +170,23 @@ else bad "sshd connect" "could not open tcp/22 on localhost"; fi
 ts=$(timeout 8 tailscale status --json 2>/dev/null | jq -r '.BackendState // "unknown"' 2>/dev/null)
 if [ "$ts" = Running ]; then ok "tailscale BackendState=Running"
 else bad "tailscale" "BackendState=${ts:-unavailable}"; fi
+
+# C13 -- outbound control path: resolve via dnsmasq, then connect
+ctl_ip=$(timeout 6 dig +short +time=2 +tries=1 "$CONTROL_HOST" @127.0.0.1 2>/dev/null | grep -E '^[0-9.]+$' | head -1)
+if [ -z "$ctl_ip" ]; then
+  bad "control path dns" "$CONTROL_HOST did not resolve via 127.0.0.1"
+elif timeout 8 bash -c "exec 3<>/dev/tcp/$ctl_ip/$CONTROL_PORT" 2>/dev/null; then
+  ok "control path reachable: $CONTROL_HOST ($ctl_ip:$CONTROL_PORT)"
+else
+  bad "control path connect" "resolved $ctl_ip but tcp/$CONTROL_PORT refused or timed out"
+fi
+
+# C14 -- the slice the agent session lives in must still be up; if
+# user@1000.service is restarted by an activation, the agent dies and does NOT
+# come back on its own.
+us=$(systemctl is-active user@1000.service 2>/dev/null)
+if [ "$us" = active ]; then ok "user@1000.service active (agent session slice)"
+else bad "user@1000.service" "is-active=${us:-unknown}; agent session would be gone"; fi
 
 # ------------------------------------------------------------------- verdict
 if [ "$QUIET" != 1 ]; then
