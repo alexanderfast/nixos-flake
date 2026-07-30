@@ -23,6 +23,16 @@
 #   --watchdog N     auto-revert deadline in minutes (default 10, 0 disables).
 #   --settle N       seconds to wait after activation before verifying (default 20).
 #   --yes            skip the interactive confirmation prompt.
+#   --detach         re-exec as a transient system unit owned by PID 1, so the
+#                    run survives the caller dying, then follow it with:
+#                      journalctl -fu nuc-rebuild-run
+#
+# WHY --detach MATTERS: the agent that normally invokes this lives in
+# user@1000.service. Run as a child of that session, a dying session would kill
+# this script mid-flight -- the watchdog would then revert a configuration that
+# might have been fine, because nothing was left alive to finish verifying it.
+# Detached, the decision is made by a local process owned by PID 1 and needs no
+# network, no agent, and no cloud round-trip.
 
 set -uo pipefail
 export PATH=/run/current-system/sw/bin:/usr/bin:/bin
@@ -32,10 +42,12 @@ HOST=nuc
 VERIFY=/usr/local/bin/nuc-verify
 LOG=/var/log/nuc-rebuild.log
 WD_UNIT=nuc-rebuild-watchdog
+RUN_UNIT=nuc-rebuild-run
 WATCHDOG_MIN=10
 SETTLE=20
 DRY_RUN=0
 ASSUME_YES=0
+DETACH=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -43,7 +55,8 @@ while [ $# -gt 0 ]; do
     --watchdog)  WATCHDOG_MIN=${2:?--watchdog needs minutes}; shift 2;;
     --settle)    SETTLE=${2:?--settle needs seconds}; shift 2;;
     --yes|-y)    ASSUME_YES=1; shift;;
-    -h|--help)   sed -n '2,26p' "$0"; exit 0;;
+    --detach)    DETACH=1; shift;;
+    -h|--help)   sed -n '2,38p' "$0"; exit 0;;
     *) echo "nuc-rebuild: unknown argument: $1" >&2; exit 2;;
   esac
 done
@@ -73,6 +86,25 @@ cd "$FLAKE_DIR" || die "cannot cd to $FLAKE_DIR"
 
 if [ "$DRY_RUN" != 1 ] && [ "$(id -u)" != 0 ]; then
   die "must run as root (via the sudoers NOPASSWD entry) unless --dry-run"
+fi
+
+# --------------------------------------------------- re-exec detached, if asked
+# Hand the run to PID 1 so it cannot be killed by the caller's session dying.
+if [ "$DETACH" = 1 ] && [ "${NUC_REBUILD_DETACHED:-0}" != 1 ]; then
+  [ "$DRY_RUN" = 1 ] && die "--detach is pointless with --dry-run (nothing is activated)"
+  systemctl stop "$RUN_UNIT.service" 2>/dev/null
+  systemctl reset-failed "$RUN_UNIT.service" 2>/dev/null
+  if systemd-run --unit="$RUN_UNIT" --collect --service-type=oneshot \
+       --setenv=NUC_REBUILD_DETACHED=1 \
+       --description="nuc rebuild+verify (detached)" \
+       "$0" --yes --watchdog "$WATCHDOG_MIN" --settle "$SETTLE" >/dev/null 2>&1; then
+    log "detached: running as $RUN_UNIT.service (owned by PID 1)"
+    log "follow with:  journalctl -fu $RUN_UNIT"
+    log "or read:      $LOG"
+    exit 0
+  else
+    die "could not start $RUN_UNIT; refusing to run attached to a session that may die"
+  fi
 fi
 
 # ------------------------------------------------------------------- context
@@ -161,8 +193,18 @@ else
 fi
 
 # ------------------------------------------------- 5. make it the boot default
-log "step 5/5: verification green -- disarming watchdog and making it the boot default"
-disarm
+# Do NOT disarm before switching: dying in the window between disarm and the
+# final verification would leave the box on an unverified generation with no
+# revert armed. Re-arm a short deadline instead, and only disarm once the
+# post-switch verification has actually passed.
+log "step 5/5: verification green -- re-arming a short watchdog, then making it the boot default"
+if [ "$WATCHDOG_MIN" != 0 ]; then
+  disarm
+  systemd-run --unit="$WD_UNIT" --on-active="5min" --collect \
+    --description="auto-revert nuc to $OLD_GEN (switch phase)" \
+    "$OLD_GEN/bin/switch-to-configuration" test >/dev/null 2>&1 \
+    || die "could not re-arm watchdog for the switch phase; leaving system on tested config"
+fi
 if ! nixos-rebuild switch --flake ".#$HOST" 2>&1 | tail -20; then
   log "switch FAILED after a green test; rolling back"
   nixos-rebuild switch --rollback 2>&1 | tail -5
@@ -171,10 +213,12 @@ fi
 
 log "re-verifying after switch"
 if "$VERIFY" --since "$STAMP"; then
+  disarm
   log "=== nuc-rebuild SUCCESS: $NEW_GEN is active and is the boot default ==="
   exit 0
 else
   log "post-switch verification FAILED; rolling back"
   nixos-rebuild switch --rollback 2>&1 | tail -5
+  disarm
   die "post-switch verification failed; rolled back"
 fi

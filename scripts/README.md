@@ -104,14 +104,33 @@ than by UUID (see the NUC board, card #5).
 ## Use
 
 ```bash
-sudo -n nuc-rebuild                 # build, test, verify, switch if green
+sudo -n nuc-rebuild --detach        # RECOMMENDED: owned by PID 1, survives the caller dying
+sudo -n nuc-rebuild                 # same, but attached to the calling session
 sudo -n nuc-rebuild --dry-run       # build + verify only, never activates
 sudo -n nuc-rebuild --watchdog 20   # longer auto-revert deadline
 nuc-verify                          # health check on demand, no privilege
 nuc-verify --since '5 min ago'      # only consider recent journal entries
+
+journalctl -fu nuc-rebuild-run                     # follow a detached run
+systemctl list-timers nuc-rebuild-watchdog.timer   # is a revert armed?
 ```
 
 Every run appends to `/var/log/nuc-rebuild.log`.
+
+### Use `--detach` when an agent drives it
+
+The agent lives in `user@1000.service`. Attached, a dying session kills the
+wrapper mid-flight and the watchdog then reverts a configuration that may have
+been perfectly good — the box stays safe, but the result is a false negative and
+you learn nothing. Detached, the run belongs to PID 1: verification finishes and
+the accept/revert decision is made locally, with no agent, network, or cloud
+round-trip involved. The agent's only remaining job is to read the outcome
+afterwards, which it can do whenever it reconnects.
+
+Empirically the session does survive rebuilds — `user@1000.service` has been up
+since 2026-04-18 across five switches — so this is defence against the
+uncommon case (a change that restarts the network stack or the user manager),
+not the expected one.
 
 ## Recovery ladder
 
