@@ -5,3 +5,6 @@
 node_modules/
 package.json
 package-lock.json
+
+# nixos-rebuild build / nuc-rebuild --dry-run leave a gc-root symlink here
+/result
