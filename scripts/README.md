@@ -153,6 +153,36 @@ If the agent goes silent but the box is healthy, the likely cause is
 `user@1000.service` or the tmux scope being restarted. Nothing auto-recovers
 that: SSH in and start `claude rc` again.
 
+## Sensitive changes: hand off, do not drive them through the loop
+
+Some changes must not be activated by an agent through this loop at all, because
+the agent's control path runs *through* what is being changed. For these, the
+agent should prepare and commit the change, prove it with
+`nuc-rebuild --dry-run`, then hand the operator the exact command and wait —
+rather than stalling, or activating and hoping.
+
+Treat as sensitive anything touching:
+
+* networking / NetworkManager, or anything that reconfigures interfaces
+* dnsmasq or DNS resolution
+* sshd or the firewall
+* `user@1000.service`, or home-manager-managed user units
+* the bootloader
+* filesystems and mounts
+* sudo / `security.*`
+
+Handoff looks like:
+
+```bash
+# operator, over SSH from the desktop:
+cd ~/flake && sudo nixos-rebuild switch --flake '.#nuc'
+# then hand back; the agent runs nuc-verify and reports
+```
+
+A human on SSH is immune to the failure mode that makes these risky for the
+agent: if DNS or the user manager goes down, the agent loses its channel, while
+the operator's shell does not care.
+
 ## Threat model, stated plainly
 
 The NOPASSWD rule is **not** a security boundary against deliberate misuse:
