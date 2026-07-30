@@ -231,7 +231,14 @@ it is worth making reproducible before leaning on unattended rebuilds.
 8. `/mnt/sda` is a mountpoint and is readable
 9. the journal is readable and emits parseable JSON
 10. no journal error *signatures* absent from the baseline (numbers, hex, UUIDs
-    and store hashes are normalised, so varying values are not false positives)
+    and store hashes are normalised, so varying values are not false positives).
+    Sudo/PAM auth failures are ignored via `IGNORE_SIGNATURES` — a denied sudo
+    says something about who typed what, not whether the box is healthy, and an
+    agent probing its own permissions during the verify window would otherwise
+    trigger a rollback of a perfectly good configuration. Ignored entries are
+    **counted and reported** on the pass line, not silently dropped. Repeated
+    auth failures remain a security signal; watch for them in the journal, not
+    here.
 11. sshd accepts a TCP connection
 12. `tailscale status` reports `BackendState=Running`
 13. the agent control path works: `api.anthropic.com` resolves via dnsmasq and
