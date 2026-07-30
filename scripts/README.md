@@ -103,16 +103,30 @@ than by UUID (see the NUC board, card #5).
 
 ## Use
 
+`/usr/local/bin` is **not** on `$PATH` on NixOS and sudo sets no `secure_path`, so
+use absolute paths. This also matches the sudoers rule exactly, which is keyed on
+the absolute path.
+
 ```bash
-sudo -n nuc-rebuild --detach        # RECOMMENDED: owned by PID 1, survives the caller dying
-sudo -n nuc-rebuild                 # same, but attached to the calling session
-sudo -n nuc-rebuild --dry-run       # build + verify only, never activates
-sudo -n nuc-rebuild --watchdog 20   # longer auto-revert deadline
-nuc-verify                          # health check on demand, no privilege
-nuc-verify --since '5 min ago'      # only consider recent journal entries
+sudo -n /usr/local/bin/nuc-rebuild --detach      # RECOMMENDED: owned by PID 1
+sudo -n /usr/local/bin/nuc-rebuild               # same, attached to the caller
+sudo -n /usr/local/bin/nuc-rebuild --dry-run     # build + verify only
+sudo -n /usr/local/bin/nuc-rebuild --watchdog 20 # longer auto-revert deadline
+/usr/local/bin/nuc-verify                        # health check, no privilege
+/usr/local/bin/nuc-verify --since '5 min ago'    # recent journal entries only
 
 journalctl -fu nuc-rebuild-run                     # follow a detached run
 systemctl list-timers nuc-rebuild-watchdog.timer   # is a revert armed?
+```
+
+If you want short names, add aliases in home-manager rather than putting
+unmanaged `/usr/local/bin` on the system PATH:
+
+```nix
+programs.zsh.shellAliases = {
+  nuc-verify  = "/usr/local/bin/nuc-verify";
+  nuc-rebuild = "sudo -n /usr/local/bin/nuc-rebuild";
+};
 ```
 
 Every run appends to `/var/log/nuc-rebuild.log`.
