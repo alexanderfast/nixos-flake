@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+# nuc-rebuild -- activate the flake on nuc with an armed auto-revert.
+#
+# Sequence (deviating from it is the whole point of this being a fixed script):
+#   1. build            -- fails before anything is touched
+#   2. arm watchdog     -- transient systemd timer, independent of the caller's
+#                          session, that restores the CURRENT generation if this
+#                          script dies or wedges the box (e.g. SSH is lost)
+#   3. test             -- activate WITHOUT making it the boot default
+#   4. verify           -- /usr/local/bin/nuc-verify against a journal window
+#                          starting at activation
+#   5a. pass -> disarm, then `switch` to make it the boot default, re-verify
+#   5b. fail -> restore the previous generation immediately, disarm, exit 1
+#
+# Deployed copy lives at /usr/local/bin/nuc-rebuild, root-owned, and is the only
+# path granted NOPASSWD in sudoers. Promote a reviewed change with:
+#   sudo install -m 0755 -o root -g root scripts/nuc-rebuild /usr/local/bin/nuc-rebuild
+#
+# Usage:
+#   nuc-rebuild [--dry-run] [--watchdog MINUTES] [--settle SECONDS] [--yes]
+#
+#   --dry-run        build + verify only. Never activates. Works without root.
+#   --watchdog N     auto-revert deadline in minutes (default 10, 0 disables).
+#   --settle N       seconds to wait after activation before verifying (default 20).
+#   --yes            skip the interactive confirmation prompt.
+
+set -uo pipefail
+export PATH=/run/current-system/sw/bin:/usr/bin:/bin
+
+FLAKE_DIR=/home/alex/flake
+HOST=nuc
+VERIFY=/usr/local/bin/nuc-verify
+LOG=/var/log/nuc-rebuild.log
+WD_UNIT=nuc-rebuild-watchdog
+WATCHDOG_MIN=10
+SETTLE=20
+DRY_RUN=0
+ASSUME_YES=0
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dry-run)   DRY_RUN=1; shift;;
+    --watchdog)  WATCHDOG_MIN=${2:?--watchdog needs minutes}; shift 2;;
+    --settle)    SETTLE=${2:?--settle needs seconds}; shift 2;;
+    --yes|-y)    ASSUME_YES=1; shift;;
+    -h|--help)   sed -n '2,26p' "$0"; exit 0;;
+    *) echo "nuc-rebuild: unknown argument: $1" >&2; exit 2;;
+  esac
+done
+
+log() {
+  local line
+  line="[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+  printf '%s\n' "$line"
+  [ -w "$(dirname "$LOG")" ] && printf '%s\n' "$line" >> "$LOG" 2>/dev/null
+  return 0
+}
+die() { log "ERROR: $*"; exit 1; }
+
+# Fall back to the in-repo verify script only for --dry-run, so that a real
+# activation can never be verified by something living in the editable repo.
+if [ ! -x "$VERIFY" ]; then
+  if [ "$DRY_RUN" = 1 ] && [ -x "$FLAKE_DIR/scripts/nuc-verify" ]; then
+    VERIFY="$FLAKE_DIR/scripts/nuc-verify"
+    log "NOTE: $VERIFY not installed; using repo copy for --dry-run only"
+  else
+    die "$VERIFY not found or not executable. Install it first (see scripts/README.md)."
+  fi
+fi
+
+[ -d "$FLAKE_DIR" ] || die "flake dir $FLAKE_DIR does not exist"
+cd "$FLAKE_DIR" || die "cannot cd to $FLAKE_DIR"
+
+if [ "$DRY_RUN" != 1 ] && [ "$(id -u)" != 0 ]; then
+  die "must run as root (via the sudoers NOPASSWD entry) unless --dry-run"
+fi
+
+# ------------------------------------------------------------------- context
+log "=== nuc-rebuild start (dry-run=$DRY_RUN watchdog=${WATCHDOG_MIN}m settle=${SETTLE}s) ==="
+GIT_HEAD=$(git -C "$FLAKE_DIR" rev-parse --short HEAD 2>/dev/null || echo '?')
+GIT_DIRTY=$(git -C "$FLAKE_DIR" status --porcelain 2>/dev/null | wc -l)
+log "flake at $GIT_HEAD ($GIT_DIRTY uncommitted change(s))"
+[ "$GIT_DIRTY" -gt 0 ] && log "WARNING: working tree is dirty; activating uncommitted state"
+
+OLD_GEN=$(readlink -f /run/current-system)
+log "current generation: $OLD_GEN"
+[ -x "$OLD_GEN/bin/switch-to-configuration" ] \
+  || die "current generation has no switch-to-configuration; cannot arm a revert"
+
+# ----------------------------------------------------------------- 1. build
+log "step 1/5: building .#$HOST"
+if ! nixos-rebuild build --flake ".#$HOST" 2>&1 | tail -20; then
+  die "build failed -- nothing was activated"
+fi
+NEW_GEN=$(readlink -f ./result 2>/dev/null || echo '?')
+log "built: $NEW_GEN"
+if [ "$NEW_GEN" = "$OLD_GEN" ]; then
+  log "built system is identical to the running one; nothing to activate"
+fi
+
+# --------------------------------------------------- dry-run stops here
+if [ "$DRY_RUN" = 1 ]; then
+  log "step 2/5: (skipped, dry-run) would arm watchdog"
+  log "step 3/5: (skipped, dry-run) would activate via 'test'"
+  log "step 4/5: verifying CURRENT system as a baseline sanity check"
+  if "$VERIFY"; then log "dry-run: build OK, current system verifies clean"; exit 0
+  else die "dry-run: current system already FAILS verification -- fix that before activating"; fi
+fi
+
+# ------------------------------------------------------------- confirmation
+if [ "$ASSUME_YES" != 1 ]; then
+  printf 'Activate %s on %s? Previous generation auto-restores in %s min. [y/N] ' \
+    "$NEW_GEN" "$HOST" "$WATCHDOG_MIN"
+  read -r reply
+  case "$reply" in y|Y|yes|YES) ;; *) log "aborted by operator"; exit 1;; esac
+fi
+
+# --------------------------------------------------------- 2. arm watchdog
+disarm() {
+  systemctl stop "$WD_UNIT.timer" 2>/dev/null
+  systemctl stop "$WD_UNIT.service" 2>/dev/null
+  systemctl reset-failed "$WD_UNIT.service" 2>/dev/null
+  return 0
+}
+if [ "$WATCHDOG_MIN" != 0 ]; then
+  disarm  # clear any stale arming from a previous run
+  if systemd-run --unit="$WD_UNIT" --on-active="${WATCHDOG_MIN}min" --collect \
+       --description="auto-revert nuc to $OLD_GEN" \
+       "$OLD_GEN/bin/switch-to-configuration" test >/dev/null 2>&1; then
+    log "step 2/5: watchdog armed -- restores $OLD_GEN in ${WATCHDOG_MIN}min unless disarmed"
+  else
+    die "could not arm watchdog; refusing to activate without a revert path"
+  fi
+else
+  log "step 2/5: watchdog DISABLED by --watchdog 0 (no automatic revert)"
+fi
+
+# --------------------------------------------------------------- 3. activate
+STAMP=$(date '+%Y-%m-%d %H:%M:%S')
+log "step 3/5: activating via 'test' (boot default unchanged), journal window from $STAMP"
+if ! nixos-rebuild test --flake ".#$HOST" 2>&1 | tail -20; then
+  log "activation FAILED; restoring $OLD_GEN"
+  "$OLD_GEN/bin/switch-to-configuration" test 2>&1 | tail -5
+  disarm
+  die "nixos-rebuild test failed; previous generation restored"
+fi
+
+log "waiting ${SETTLE}s for services to settle"
+sleep "$SETTLE"
+
+# ----------------------------------------------------------------- 4. verify
+log "step 4/5: verifying"
+if "$VERIFY" --since "$STAMP"; then
+  log "verification PASSED"
+else
+  log "verification FAILED; restoring $OLD_GEN"
+  "$OLD_GEN/bin/switch-to-configuration" test 2>&1 | tail -5
+  disarm
+  log "previous generation restored; boot default was never changed"
+  die "verification failed -- reverted"
+fi
+
+# ------------------------------------------------- 5. make it the boot default
+log "step 5/5: verification green -- disarming watchdog and making it the boot default"
+disarm
+if ! nixos-rebuild switch --flake ".#$HOST" 2>&1 | tail -20; then
+  log "switch FAILED after a green test; rolling back"
+  nixos-rebuild switch --rollback 2>&1 | tail -5
+  die "switch failed; rolled back"
+fi
+
+log "re-verifying after switch"
+if "$VERIFY" --since "$STAMP"; then
+  log "=== nuc-rebuild SUCCESS: $NEW_GEN is active and is the boot default ==="
+  exit 0
+else
+  log "post-switch verification FAILED; rolling back"
+  nixos-rebuild switch --rollback 2>&1 | tail -5
+  die "post-switch verification failed; rolled back"
+fi

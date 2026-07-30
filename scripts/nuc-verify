@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+# nuc-verify -- decide whether the nuc is "working".
+#
+# Read-only. Needs no privilege; safe to run at any time.
+# Exit 0 = all criteria pass, 1 = at least one failed, 2 = usage/internal error.
+#
+# Deployed copy lives at /usr/local/bin/nuc-verify (root-owned) so that the
+# rebuild wrapper cannot be weakened by editing the repo. This file is the
+# reviewable source; promote it with:
+#   sudo install -m 0755 -o root -g root scripts/nuc-verify /usr/local/bin/nuc-verify
+#
+# Usage:
+#   nuc-verify [--since TIMESTAMP] [--update-baseline] [--quiet]
+#
+#   --since TIMESTAMP   only consider journal entries at/after TIMESTAMP
+#                       (any journalctl --since value). Without it, the whole
+#                       current boot is considered.
+#   --update-baseline   record the current journal error signatures as accepted
+#                       and exit. Needs write access to the state dir (root).
+#   --quiet             only print the final verdict line.
+#
+# Override the state dir for testing: NUC_VERIFY_STATE=/tmp/foo nuc-verify
+
+set -uo pipefail
+export PATH=/run/current-system/sw/bin:/usr/bin:/bin
+
+STATE_DIR=${NUC_VERIFY_STATE:-/var/lib/nuc-verify}
+BASELINE="$STATE_DIR/journal-baseline.txt"
+
+SINCE=""
+UPDATE_BASELINE=0
+QUIET=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --since) SINCE=${2:?--since needs a value}; shift 2;;
+    --update-baseline) UPDATE_BASELINE=1; shift;;
+    --quiet) QUIET=1; shift;;
+    -h|--help) sed -n '2,25p' "$0"; exit 0;;
+    *) echo "nuc-verify: unknown argument: $1" >&2; exit 2;;
+  esac
+done
+
+# ---------------------------------------------------------------- expectations
+# Units that must be active for the box to be considered working.
+REQUIRED_UNITS=(
+  sshd.service
+  NetworkManager.service
+  dnsmasq.service
+  jellyfin.service
+  qbittorrent.service
+  tailscaled.service
+  podman-openhab.service
+)
+# TCP ports that must be listening.        22 ssh | 53 dns | 8080 openHAB
+REQUIRED_TCP=(22 53 8080 8081 8096)      # 8081 qBittorrent | 8096 Jellyfin
+REQUIRED_UDP=(53)
+LOCAL_NAME=nuc.lan
+LOCAL_NAME_EXPECT=192.168.1.101
+EXTERNAL_NAME=example.com
+REQUIRED_MOUNT=/mnt/sda
+
+pass=0; fail=0; results=()
+say() { [ "$QUIET" = 1 ] || printf '%s\n' "$*"; }
+ok()   { pass=$((pass+1)); results+=("PASS  $1"); }
+bad()  { fail=$((fail+1)); results+=("FAIL  $1 -- $2"); }
+
+# --------------------------------------------------------- journal signatures
+# Normalise an error message into a stable signature so that varying numbers,
+# hex, paths and PIDs do not look like new errors on every run.
+journal_signatures() {
+  local args=(-b -p 3 --no-pager -o json)
+  [ -n "$SINCE" ] && args+=(--since "$SINCE")
+  journalctl "${args[@]}" 2>/dev/null \
+    | jq -r '((._SYSTEMD_UNIT // .SYSLOG_IDENTIFIER // "?") + "|" +
+              (if (.MESSAGE|type) == "array" then "<binary>" else (.MESSAGE // "") end))' \
+    | sed -E '
+        s/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/<uuid>/g;
+        s#/nix/store/[a-z0-9]{32}-#/nix/store/<hash>-#g;
+        s/\b[0-9a-f]{16,}\b/<hex>/g;
+        s/\b[0-9]+\b/<n>/g;
+        s/[[:space:]]+/ /g;
+        s/^ | $//g' \
+    | sort -u
+}
+
+# ------------------------------------------------------------------ baseline
+if [ "$UPDATE_BASELINE" = 1 ]; then
+  mkdir -p "$STATE_DIR" || { echo "nuc-verify: cannot create $STATE_DIR (need root?)" >&2; exit 2; }
+  journal_signatures > "$BASELINE" || { echo "nuc-verify: failed to write baseline" >&2; exit 2; }
+  echo "nuc-verify: baseline updated: $(wc -l < "$BASELINE") signatures in $BASELINE"
+  exit 0
+fi
+
+say "nuc-verify  $(date '+%Y-%m-%d %H:%M:%S')${SINCE:+  (journal window: since $SINCE)}"
+say ""
+
+# C1 -- overall systemd state
+state=$(systemctl is-system-running 2>/dev/null)
+if [ "$state" = running ]; then ok "systemd state is 'running'"
+else bad "systemd state" "expected 'running', got '${state:-unknown}'"; fi
+
+# C2 -- no failed units
+failed_list=$(systemctl --failed --no-legend --no-pager 2>/dev/null | awk '{print $1}' | tr '\n' ' ')
+if [ -z "${failed_list// /}" ]; then ok "no failed units"
+else bad "failed units" "$failed_list"; fi
+
+# C3 -- required units active
+for u in "${REQUIRED_UNITS[@]}"; do
+  a=$(systemctl is-active "$u" 2>/dev/null)
+  if [ "$a" = active ]; then ok "unit active: $u"
+  else bad "unit $u" "is-active=${a:-unknown}"; fi
+done
+
+# C4/C5 -- required listening ports
+listening_tcp=$(ss -tlnH 2>/dev/null | awk '{print $4}' | sed 's/.*://' | sort -un | tr '\n' ' ')
+for p in "${REQUIRED_TCP[@]}"; do
+  if printf '%s' " $listening_tcp " | grep -q " $p "; then ok "tcp/$p listening"
+  else bad "tcp/$p" "not listening"; fi
+done
+listening_udp=$(ss -ulnH 2>/dev/null | awk '{print $4}' | sed 's/.*://' | sort -un | tr '\n' ' ')
+for p in "${REQUIRED_UDP[@]}"; do
+  if printf '%s' " $listening_udp " | grep -q " $p "; then ok "udp/$p listening"
+  else bad "udp/$p" "not listening"; fi
+done
+
+# C6 -- local DNS resolves a name dnsmasq is authoritative for
+got=$(timeout 5 dig +short +time=2 +tries=1 "$LOCAL_NAME" @127.0.0.1 2>/dev/null | head -1)
+if [ "$got" = "$LOCAL_NAME_EXPECT" ]; then ok "dns local: $LOCAL_NAME -> $got"
+else bad "dns local $LOCAL_NAME" "expected $LOCAL_NAME_EXPECT, got '${got:-<nothing>}'"; fi
+
+# C7 -- upstream DNS forwarding works
+got=$(timeout 8 dig +short +time=3 +tries=1 "$EXTERNAL_NAME" @127.0.0.1 2>/dev/null | head -1)
+if [ -n "$got" ]; then ok "dns forward: $EXTERNAL_NAME -> $got"
+else bad "dns forward $EXTERNAL_NAME" "no answer from 127.0.0.1"; fi
+
+# C8 -- media mount present and readable
+if mountpoint -q "$REQUIRED_MOUNT" 2>/dev/null && ls "$REQUIRED_MOUNT" >/dev/null 2>&1; then
+  ok "mount readable: $REQUIRED_MOUNT"
+else
+  bad "mount $REQUIRED_MOUNT" "not a mountpoint or not readable"
+fi
+
+# C9 -- journal is readable and emits parseable JSON
+jcount=$(journalctl -b -n 20 --no-pager -o json 2>/dev/null | jq -s 'length' 2>/dev/null)
+if [ "${jcount:-0}" -gt 0 ] 2>/dev/null; then ok "journal readable and parses as JSON ($jcount recent entries)"
+else bad "journal" "journalctl produced no parseable JSON output"; fi
+
+# C10 -- no NEW journal error signatures versus the accepted baseline
+if [ -f "$BASELINE" ]; then
+  new=$(comm -13 "$BASELINE" <(journal_signatures) | head -20)
+  ncount=$(printf '%s' "$new" | grep -c . )
+  if [ "$ncount" -eq 0 ]; then ok "no new journal error signatures"
+  else bad "new journal error signatures ($ncount)" "$(printf '%s' "$new" | head -5 | tr '\n' ' / ')"; fi
+else
+  bad "journal baseline" "missing $BASELINE -- run: sudo nuc-verify --update-baseline"
+fi
+
+# C11 -- sshd actually accepts a TCP connection (my own lifeline)
+if timeout 5 bash -c 'exec 3<>/dev/tcp/127.0.0.1/22' 2>/dev/null; then ok "sshd accepts tcp connections"
+else bad "sshd connect" "could not open tcp/22 on localhost"; fi
+
+# C12 -- tailscale backend is up (the out-of-band path back in)
+ts=$(timeout 8 tailscale status --json 2>/dev/null | jq -r '.BackendState // "unknown"' 2>/dev/null)
+if [ "$ts" = Running ]; then ok "tailscale BackendState=Running"
+else bad "tailscale" "BackendState=${ts:-unavailable}"; fi
+
+# ------------------------------------------------------------------- verdict
+if [ "$QUIET" != 1 ]; then
+  for r in "${results[@]}"; do printf '  %s\n' "$r"; done
+  echo ""
+fi
+if [ "$fail" -eq 0 ]; then
+  echo "nuc-verify: PASS ($pass checks)"
+  exit 0
+else
+  echo "nuc-verify: FAIL ($fail failed, $pass passed)"
+  exit 1
+fi
