@@ -35,6 +35,7 @@
     ../modules/jellyfin.nix
     ../modules/dnsmasq.nix
     ../modules/tailscale.nix
+    ../modules/nuc-rebuild-sudo.nix
   ];
 
   nixpkgs = {
