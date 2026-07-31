@@ -109,8 +109,7 @@
     # cmake
     # gcc
 
-    # needed by nvim
-    ripgrep
+    # needed by nvim (ripgrep is listed above)
     nodejs
     cargo
     nil
@@ -147,7 +146,6 @@
     shutter
     remmina
     btop
-    i3
     keymapp
     stow
 

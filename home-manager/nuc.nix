@@ -7,10 +7,8 @@
 }:
 
 {
-  # You can import other home-manager modules here
   imports = [
     ./base.nix
-    ./home.nix
   ];
 
   home.packages = with pkgs; [

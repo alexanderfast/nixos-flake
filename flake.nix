@@ -29,10 +29,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nix-ld = {
-      url = "github:Mic92/nix-ld";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # NOTE: there is deliberately no nix-ld input. `programs.nix-ld.enable` in
+    # modules/configuration.nix is the nixpkgs module, not this flake -- the
+    # input was pulled in and never referenced.
 
     # gitlablistpy = {
     #   url = "github:alexanderfast/gitlablistpy";
@@ -45,7 +44,7 @@
     # };
   };
 
-  outputs = { self, nixpkgs, home-manager, nix-ld, ... }@inputs: let
+  outputs = { self, nixpkgs, home-manager, ... }@inputs: let
     inherit (self) outputs;
     # Supported systems for your flake packages, shell, etc.
     # All hosts here are x86_64-linux; add more when that changes.
