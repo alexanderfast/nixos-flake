@@ -27,8 +27,12 @@
     [ { device = "/dev/disk/by-uuid/28dbcb46-7f8d-442c-a3f2-d2ee8310d573"; }
     ];
 
+  # Mounted by UUID, not by kernel device name: /dev/sdX ordering is not stable
+  # across boots, so a USB disk present at boot could take this name and get
+  # mounted here -- and services.btrfs.autoScrub would then scrub whatever
+  # landed at /mnt/sda. This is a whole-disk btrfs (no partition table), 1.8T.
   fileSystems."/mnt/sda" = {
-    device = "/dev/sda";
+    device = "/dev/disk/by-uuid/6859dffe-ab1f-4453-abfa-52896857b22a";
     fsType = "btrfs";
     options = [ "defaults" "nofail" "compress=zstd" ];
   };
