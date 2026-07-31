@@ -342,7 +342,8 @@
     };
   };
 
-  hardware.graphics.enable = true;
+  # hardware.graphics.enable comes from ../modules/jellyfin.nix, which also sets
+  # the Intel VA-API driver in extraPackages.
 
   services.desktopManager.plasma6.enable = true;
   services.displayManager.defaultSession = "plasma";
