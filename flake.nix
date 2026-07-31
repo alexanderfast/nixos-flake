@@ -6,10 +6,22 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     # nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
 
-    # You can access packages and modules from different nixpkgs revs
-    # at the same time. Here's an working example:
-    # nixpkgs-unstable.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    # Also see the 'unstable-packages' overlay at 'overlays/default.nix'.
+    # TEMPORARY BRIDGE -- a second nixpkgs, tracking the same stable 25.11
+    # branch, used for exactly one package: claude-code.
+    #
+    # Why: the main `nixpkgs` above is pinned to 2026-04-17, which carries
+    # claude-code 2.1.81 -- too old for Remote Control. Updating the main input
+    # would drag ~450 derivations along with it, including the kernel
+    # (6.12.81 -> 6.12.93, needing a reboot) and dnsmasq (2.91 -> 2.92rel2,
+    # which serves the whole house). This input moves claude-code alone.
+    #
+    # Update claude-code, and nothing else, with:
+    #     nix flake update nixpkgs-claude
+    #
+    # GOAL: delete this input. Once the main nixpkgs is updated, take
+    # claude-code from it and drop both this input and the recent-claude
+    # overlay in overlays/default.nix. Tracked on the NUC Trello board.
+    nixpkgs-claude.url = "github:nixos/nixpkgs/nixos-25.11";
 
     # Home manager
     home-manager = {
