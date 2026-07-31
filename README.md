@@ -61,6 +61,30 @@ reachability does not change depending on whether you are in the house — that 
 the whole reason Tailscale is here rather than a full-tunnel WireGuard setup (see
 the comment in `modules/tailscale.nix`).
 
+All three zones are generally open, but they are **not equally trusted**:
+
+```
+localhost  >  tailnet  >  LAN          (most trusted to least)
+```
+
+* **localhost** — requires a shell on the box already.
+* **tailnet** — every peer is a device you explicitly enrolled and authenticated
+  with Tailscale. Nothing joins by accident.
+* **LAN** — admits anything that gets onto the home network: a guest's phone, a
+  smart TV, an IoT gadget with poor firmware. Least trusted of the three despite
+  feeling the most "inside".
+
+The practical consequence: when something should not be fully open, move it *up*
+the gradient rather than closing it outright. Tailnet-only is a legitimate resting
+place, not a half-measure — so a service that answers over Tailscale but not the
+LAN is correctly configured, not broken. openHAB's 8443 and 5007 are in exactly
+that state, and only need changing if LAN convenience is wanted.
+
+Corollary: a service with weak or default credentials belongs at localhost or
+tailnet, never on the LAN. openHAB's Karaf console (8101) is the example — it
+ships with well-known default credentials and is bound to `127.0.0.1`; leave it
+there.
+
 In practice that means `openFirewall = true` / listing the port in
 `allowedTCPPorts` is the normal, intended state, and LAN exposure of a service is
 a deliberate choice rather than an oversight. See the `ACCEPTED RISK` note above
