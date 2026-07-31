@@ -235,6 +235,33 @@
     description = "Alex";
     extraGroups = [ "networkmanager" "wheel" "camera" "video" "render" "audio" "lp" "torrent" ];
     shell = pkgs.zsh;
+
+    # Only PUBLIC keys go here. A public key is safe to publish -- that is the
+    # whole point of it being public; GitHub serves everyone's at
+    # github.com/<user>.keys. The matching PRIVATE keys live on the client
+    # machines in ~/.ssh and must never appear in this repo.
+    #
+    # This is additive, not a replacement: authorizedKeysFiles is
+    # ["%h/.ssh/authorized_keys" "/etc/ssh/authorized_keys.d/%u"], so any key
+    # already in ~/.ssh/authorized_keys keeps working. Declaring keys here
+    # cannot lock anyone out.
+    #
+    # For things that ARE secret (passwords, tokens, WireGuard private keys) do
+    # NOT inline them: everything in /nix/store is world-readable on the host,
+    # so that would leak even from a private repo. Use the `*File` variant of
+    # the option, pointing at a path outside the store -- as the commented-out
+    # wg-quick block in hosts/laptop/default.nix already does with
+    # `privateKeyFile` -- or adopt sops-nix/agenix, which keep *encrypted*
+    # secrets in the repo and decrypt them at activation.
+    openssh.authorizedKeys.keys = [
+      # 3072-bit RSA, SHA256:2SnkCAEpNtSn9I2Jo4/GQ3N/nM7T+anj9+xcGGD8bwg
+      # Pre-existing key, declared here so remote access is reproducible rather
+      # than un-versioned local state. See the note in the commit message: this
+      # keypair is reused and its private half is on the nuc itself, so it
+      # should be replaced by a per-client ed25519 key and then removed.
+      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDAwo6Hj5umTxyf2rf/5a3VaikY6IHmKfoLnFjcZEM5lmMAu5E2NQ7Fx5DaAMTcfFKS+KCm28OplkI3EIOnFuf4e9uPU1zlhA5tbi/8W16hE6K7je4kuhvK6CJlmkKadngYxYOccfv0wSGs8zPby6lGMeuZ657IqMTm6QiNDoRHUO/C8Wu3YW0vr9LkprzRQeJRlpleW6UTxYH6pJ7wzBW1KWpM4EEV4GAw/gYQP+ql/NecTqQnLave8vVfBvwMExTSX8uAZOG4Uz5kGbe2pZRJbHBTe8LbVfbICMH4vOb5KFCXQnsyPEfa2LW40OUfDsEtjun3FUsI79JhKrAz4AHnwGqngvQPKMzRZLRdpp6vffDjZ0kJEcljQPI/TK5uqjYPzOcviqNMB0lIaORMn6Dak1S3Ff3fe8v0WSyoagnCMC1KWTZIyp/O/bWf5czVGaA2/7Fh+ZI0N9siRW4vGkN6exQ3ZJZR4wSmtONc9g2CZ4JrGQIKjNZScFvpJeKlCGU= alex@work"
+    ];
+
     #packages = with pkgs; [
     #  firefox
     #  kate
