@@ -35,19 +35,23 @@ holds only task outputs and bundled skills; losing it costs nothing.
 - qBittorrent LAN exposure documented as an accepted risk
 - Rebuild-and-verify loop installed at `/usr/local/bin/{nuc-verify,nuc-rebuild}`
 
-**Committed but NOT pushed:** 27 commits ahead of `origin/main`. This is the
-biggest gap in the current state — see below.
+**Pushed:** `origin/main` is in sync at `ec7058b` — all 28 commits are on GitHub.
 
 ## Before rebooting
 
-1. **Fix card #5 first — `/mnt/sda` is mounted by `/dev/sda`, not by UUID.**
-   `hosts/nuc/hardware.nix:31`. The correct value is
-   `/dev/disk/by-uuid/6859dffe-ab1f-4453-abfa-52896857b22a`. Enumeration can shift
-   across a reboot, and `services.btrfs.autoScrub` would then scrub whatever
-   landed there. This is the one genuinely reboot-shaped risk still open.
-2. **Push the 27 commits.** They exist only on this disk. Everything else here is
-   recoverable; unpushed history is not.
-3. Optional: `nix flake check` still fails on the `plasma5` assertion in
+1. **ACTIVATE — this is the blocking step.** Card #5 is *committed* (`ec7058b`,
+   `/mnt/sda` now mounted by UUID) but **not live**. The running `/etc/fstab`
+   still reads `/dev/sda`. Rebooting without activating means the fix does not
+   apply and the risk it removes is still present:
+
+   ```bash
+   cd ~/flake && sudo nixos-rebuild switch --flake '.#nuc'
+   grep /mnt/sda /etc/fstab      # must show by-uuid/6859dffe-... before you reboot
+   ```
+
+   Note this creates a new generation and regenerates `grub.cfg`; re-check that
+   the newest `Configuration N` entry matches the new generation afterwards.
+2. Optional: `nix flake check` still fails on the `plasma5` assertion in
    `modules/home-xfce4-i3.nix` (card #2, affects `work`/`laptop` only).
 
 ## What the reboot itself will change
@@ -69,22 +73,49 @@ generations, so an older one is selectable.
 
 ## After rebooting
 
-1. `/usr/local/bin/nuc-verify` — **expect it to fail the journal check.** The
-   baseline was recorded against a 103-day-old boot, so a fresh boot produces
-   startup messages that look like new error signatures. Confirm the box is
-   genuinely healthy, then re-baseline:
-   `sudo /usr/local/bin/nuc-verify --update-baseline`
-2. Confirm the kernel moved: `uname -r` should read 6.12.81.
-3. Confirm `/mnt/sda` mounted the intended disk (especially if card #5 is still
-   open): `findmnt /mnt/sda` and check the UUID.
-4. Restart the agent: `tmux new -s claude` then `claude rc` — nothing
-   auto-recovers the session.
-5. `claude --version` should print 2.1.140 from
+### ⚠️ Expect `nuc-verify` to FAIL its journal check. This is not a regression.
+
+The journal baseline was recorded against a boot that was 103 days old, so it
+contains none of the messages a *fresh* boot emits. Every startup message will
+therefore look like a new error signature, and check 10 will fail — while the
+other 23 pass. Read it as "the baseline is stale", not "the reboot broke
+something".
+
+```bash
+/usr/local/bin/nuc-verify                              # expect: FAIL (1 failed, 23 passed)
+#   -> confirm the failure is ONLY "new journal error signatures"
+#   -> confirm the listed signatures are boot-time noise, not real faults
+sudo /usr/local/bin/nuc-verify --update-baseline        # accept the new boot's baseline
+/usr/local/bin/nuc-verify                              # now expect: PASS (24 checks)
+```
+
+Do **not** re-baseline before reading what the new signatures are — that is the
+one step that would hide a genuine post-reboot fault. Note the sudo/PAM ignore
+list only covers auth noise; boot messages are not ignored by design.
+
+Also expect the `[C] qBittorrent` WebUI to have generated a *new* temporary
+password into the journal (`journalctl -u qbittorrent`), since no password is
+persisted — see the ACCEPTED RISK comment in `nixos/nuc.nix`.
+
+### Then, in order
+
+1. Confirm the kernel moved: `uname -r` should read **6.12.81** (was 6.12.55).
+2. Confirm `/mnt/sda` mounted the *intended* disk:
+   `findmnt -no SOURCE,UUID /mnt/sda` → UUID must be
+   `6859dffe-ab1f-4453-abfa-52896857b22a`. This is the whole point of card #5.
+3. Confirm `current-system == booted-system` now:
+   `[ "$(readlink -f /run/current-system)" = "$(readlink -f /run/booted-system)" ]`
+4. Restart the agent: `tmux new -s claude` then `claude rc` — **nothing
+   auto-recovers the session.**
+5. `claude --version` should print **2.1.140** from
    `/etc/profiles/per-user/alex/bin/claude` (npm copy is gone).
+6. Check no watchdog was left armed from a `nuc-rebuild` run:
+   `systemctl list-timers 'nuc-rebuild*'` should be empty.
+7. `nix-gc.timer` — confirm it is still scheduled for Mon 2026-08-03 and did not
+   fire early: `systemctl list-timers 'nix-*'`.
 
 ## Next work items (detail on Trello)
 
-- Card #5 — mount `/mnt/sda` by UUID **(do before rebooting)**
 - Card #2 — `plasma5` removal breaks `work`/`laptop` eval; unblocks `nix flake check`
 - Card [KrJLZhyA] — retire the `nixpkgs-claude` bridge once the main nixpkgs is updated
 - Tier 2 leftovers: cards #15, #16, #17, #18, #19, #24 — all no-op-class, safe for
