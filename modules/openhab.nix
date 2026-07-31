@@ -24,10 +24,15 @@
   };
 
   # Bus 001 Device 011: ID 0658:0200 Sigma Designs, Inc. Aeotec Z-Stick Gen5 (ZW090) - UZB
+  #
+  # These ATTRS must be the stick's own ids. They were 1d6b:0002 -- the xHCI root
+  # hub the stick hangs off, not the stick -- so the rule matched any ttyACM device
+  # on that controller. A second CDC-ACM device would also have claimed SYMLINK
+  # "zwave" (priority 0, so the winner was undefined) and been given MODE 0666.
   services.udev.extraRules = ''
     SUBSYSTEM=="tty", KERNEL=="ttyACM[0-9]*", \
-    ATTRS{idProduct}=="0002", \
-    ATTRS{idVendor}=="1d6b", \
+    ATTRS{idVendor}=="0658", \
+    ATTRS{idProduct}=="0200", \
     MODE="0666", GROUP="zwave", SYMLINK+="zwave"
   '';
 
