@@ -69,3 +69,29 @@ a deliberate choice rather than an oversight. See the `ACCEPTED RISK` note above
 It does **not** mean every port should be listed: only ports something actually
 listens on. `modules/openhab.nix` opens 3000 and 8091 for a `zwave-js-ui`
 container that is commented out, which is surface for nothing.
+
+Given that policy, a listed port is open in all three zones at once — so for
+those the three-zone distinction collapses and "open everywhere" is simply true.
+What still differs:
+
+* **Unlisted ports are LAN-refused but tailnet-reachable.** Currently openHAB's
+  HTTPS (8443) and its LSP (5007) bind to `*` but are not in `allowedTCPPorts`,
+  so they answer over Tailscale and not from the LAN. If they should follow the
+  policy, list them.
+* **The bind address is a separate gate the firewall cannot override.** 8101
+  (openHAB Karaf console) and 631 (CUPS) bind to `127.0.0.1`, so they are
+  localhost-only regardless of `allowedTCPPorts`.
+* **The internet is excluded by the router not forwarding ports**, not by any of
+  this.
+
+### Do not test LAN blocking from the nuc itself
+
+Connecting to `192.168.1.101` *from* the nuc goes over `lo`, not `enp86s0`,
+because Linux routes traffic for a local address through loopback — and `lo` is
+trusted, so everything answers. That makes it look like the firewall is open when
+it is not. Test from another machine, or read the rules directly:
+
+```
+grep -E 'dport|-i (lo|tailscale0)' \
+  $(grep -oE '/nix/store/\S*firewall-start\S*' /etc/systemd/system/firewall.service)
+```
