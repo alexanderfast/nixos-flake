@@ -35,7 +35,8 @@
 # network, no agent, and no cloud round-trip.
 
 set -uo pipefail
-export PATH=/run/current-system/sw/bin:/usr/bin:/bin
+SAFE_PATH=/run/current-system/sw/bin:/usr/bin:/bin
+export PATH=$SAFE_PATH
 
 FLAKE_DIR=/home/alex/flake
 HOST=nuc
@@ -94,15 +95,21 @@ if [ "$DETACH" = 1 ] && [ "${NUC_REBUILD_DETACHED:-0}" != 1 ]; then
   [ "$DRY_RUN" = 1 ] && die "--detach is pointless with --dry-run (nothing is activated)"
   systemctl stop "$RUN_UNIT.service" 2>/dev/null
   systemctl reset-failed "$RUN_UNIT.service" 2>/dev/null
-  if systemd-run --unit="$RUN_UNIT" --collect --service-type=oneshot \
+  # PATH must be passed in: a transient unit inherits only systemd's own
+  # environment, which on NixOS is just the systemd store bin. There is no
+  # /bin/bash or /usr/bin/bash, so the `#!/usr/bin/env bash` shebang would fail
+  # with 127 before this script's own `export PATH` above could run.
+  if run_err=$(systemd-run --unit="$RUN_UNIT" --collect --service-type=oneshot \
        --setenv=NUC_REBUILD_DETACHED=1 \
+       --setenv=PATH="$SAFE_PATH" \
        --description="nuc rebuild+verify (detached)" \
-       "$0" --yes --watchdog "$WATCHDOG_MIN" --settle "$SETTLE" >/dev/null 2>&1; then
+       "$0" --yes --watchdog "$WATCHDOG_MIN" --settle "$SETTLE" 2>&1); then
     log "detached: running as $RUN_UNIT.service (owned by PID 1)"
     log "follow with:  journalctl -fu $RUN_UNIT"
     log "or read:      $LOG"
     exit 0
   else
+    log "systemd-run failed: $run_err"
     die "could not start $RUN_UNIT; refusing to run attached to a session that may die"
   fi
 fi
