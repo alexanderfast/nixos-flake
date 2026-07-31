@@ -135,6 +135,31 @@
   # };
 
   # qBittorrent system service
+  #
+  # ACCEPTED RISK -- deliberate, do not "fix" this in a panic later.
+  # The WebUI listens on 0.0.0.0:8081 with openFirewall = true and NO password,
+  # so anyone on the LAN can reach it, add torrents, and choose the download
+  # path (files are written as the `torrent` user, and alex is in that group).
+  # We accept that: this is a trusted home LAN and the box is not port-forwarded
+  # to the internet.
+  #
+  # Why there is no password rather than "we forgot one": setting
+  # Password_PBKDF2 below would be worse than leaving it out.
+  # `services.qbittorrent.serverConfig` is rendered with `pkgs.writeText`, so
+  # the whole qBittorrent.conf lands in /nix/store world-readable (mode 444) and
+  # is committed to this public repo -- a PBKDF2 hash there is crackable
+  # offline. The module then symlinks the live config to that read-only store
+  # path (tmpfiles "L+", only when serverConfig != {}), so qBittorrent cannot
+  # persist its own config either: a password set through the WebUI would not
+  # survive. It is all-or-nothing; you cannot mix declarative non-secrets with a
+  # mutable secret in one file.
+  #
+  # If this ever needs to change, the options are: bind Address to 127.0.0.1 and
+  # reach it over Tailscale; or set serverConfig = { } so qBittorrent owns a
+  # mutable conf under profileDir and set the password in the UI; or use
+  # sops-nix/agenix with an ExecStartPre that merges the secret in at runtime.
+  # Tracked on the NUC Trello board, card "[C] qBittorrent WebUI open on the LAN
+  # with no password".
   services.qbittorrent = {
     enable = true;
     # qBittorrent runs as a user; usually better to dedicate a user
@@ -161,9 +186,10 @@
           # Optional: set username here
           Username = "admin";
 
-          # Optional: set a PBKDF2 password hash here.
-          # If you leave this out, qBittorrent will generate a temporary password
-          # and print it in the logs (journalctl -u torrent).
+          # Intentionally NOT set -- see the ACCEPTED RISK note above. Putting a
+          # PBKDF2 hash here would publish it to /nix/store (world-readable) and
+          # to this public repo. qBittorrent generates a temporary password
+          # instead and prints it to the journal (journalctl -u qbittorrent).
           # Password_PBKDF2 = "<PBKDF2 hash>";
         };
       };
