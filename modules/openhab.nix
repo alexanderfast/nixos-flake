@@ -38,9 +38,25 @@
   # 3000 and 8091 were opened for the zwave-js-ui container that is commented out
   # below, so they were surface for nothing -- confirmed with `ss`: unbound.
   #
-  # 8080 is deliberately still open on the LAN, but note it is only partly
-  # authenticated: /rest/things and /rest/inbox return 401 while /rest/items
-  # returns 200 and leaks live item state. See the "[C] openHAB firewall" card.
+  # ACCEPTED RISK -- deliberate, do not "fix" this in a panic later.
+  # 8080 is open on the LAN and openHAB's REST API is only partly authenticated:
+  # /rest/things and /rest/inbox return 401, but /rest/ and /rest/items return
+  # 200 to an unauthenticated caller and leak live item state -- Z-Wave sensor
+  # readings and light/dimmer states, named per device. So anything on the home
+  # network can enumerate what the house has and what it is doing right now.
+  # (Only the read path was tested; whether item *commands* are equally open was
+  # deliberately not probed, because doing so actuates real hardware. Assume it
+  # may be until someone checks.)
+  #
+  # We accept that for the same reason as qBittorrent on 8081: trusted home LAN,
+  # and the router does not forward ports. See the ACCEPTED RISK note above
+  # `services.qbittorrent` in nixos/nuc.nix.
+  #
+  # If this should change, the knob is to drop 8080 from this list. That closes
+  # the LAN only -- tailscale0 is a trusted interface, so it stays reachable over
+  # Tailscale, which is the intended resting place for something like this. Do
+  # NOT instead bind openHAB to 127.0.0.1: that locks out the tailnet too. The
+  # "Network exposure on nuc" section of README.md works this through.
   networking.firewall = {
     allowedTCPPorts = [ 8080 ];
   };

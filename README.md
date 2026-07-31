@@ -88,9 +88,11 @@ Two traps when reading that log:
 * **It is in UTC while the host is CEST**, despite `/etc/localtime` being
   bind-mounted — so timestamps look two hours behind. Convert before concluding a
   log line predates a restart.
-* **`/srv/openhab/userdata/logs/` is container-owned and needs `sudo`.** The `0777`
-  from `systemd.tmpfiles.rules` applies to the parent directory only; `logs/` was
-  created by the container.
+* **`/srv/openhab/userdata/logs/` is container-owned and needs `sudo`.** The modes
+  in `systemd.tmpfiles.rules` apply to the declared directories only; `logs/` was
+  created by the container. Since `e00cf13` the tree is `openhab`-owned and no
+  longer world-readable (`0750` parent, `0770` below), so `sudo` is needed to read
+  *any* of it unless you are in the `openhab` group.
 
 **`stat /dev/zwave` reports `777`, and that is normal.** It is the symlink's own
 mode, which Linux always reports as `lrwxrwxrwx` and never enforces. Use
@@ -170,8 +172,9 @@ a deliberate choice rather than an oversight. See the `ACCEPTED RISK` note above
 `services.qbittorrent` in `nixos/nuc.nix` for a worked example.
 
 It does **not** mean every port should be listed: only ports something actually
-listens on. `modules/openhab.nix` opens 3000 and 8091 for a `zwave-js-ui`
-container that is commented out, which is surface for nothing.
+listens on. `modules/openhab.nix` used to open 3000 and 8091 for a `zwave-js-ui`
+container that is commented out — surface for nothing, removed in `e00cf13`.
+Check with `ss -ltn` before adding a port, not just before removing one.
 
 Given that policy, a listed port is open in all three zones at once — so for
 those the three-zone distinction collapses and "open everywhere" is simply true.
