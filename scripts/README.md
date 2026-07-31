@@ -72,6 +72,22 @@ than by UUID (see the NUC board, card #5).
    sudo install -m 0755 -o root -g root scripts/nuc-rebuild /usr/local/bin/nuc-rebuild
    ```
 
+   **These are copies, not symlinks, so editing a script in this repo does
+   nothing until you re-run the matching `install` line.** That is deliberate --
+   a symlink into a repo `alex` can write would defeat the point of the wrapper
+   being root-owned, since the sudoers rule grants NOPASSWD on the absolute path.
+   The cost is that the two drift silently. Check before trusting a fix to be
+   live, and re-install if it differs:
+
+   ```bash
+   diff /usr/local/bin/nuc-rebuild scripts/nuc-rebuild
+   diff /usr/local/bin/nuc-verify  scripts/nuc-verify
+   ```
+
+   An agent cannot do this step: the sudoers rule covers only running
+   `/usr/local/bin/nuc-rebuild`, not installing over it. So a script fix always
+   needs a human to run one `install` line before it takes effect.
+
 3. **Record the journal baseline.** Without this, `nuc-verify` fails on the
    baseline check by design (fail-closed rather than silently skipping).
 
@@ -112,6 +128,7 @@ sudo -n /usr/local/bin/nuc-rebuild --detach      # RECOMMENDED: owned by PID 1
 sudo -n /usr/local/bin/nuc-rebuild               # same, attached to the caller
 sudo -n /usr/local/bin/nuc-rebuild --dry-run     # build + verify only
 sudo -n /usr/local/bin/nuc-rebuild --watchdog 20 # longer auto-revert deadline
+sudo -n /usr/local/bin/nuc-rebuild --settle 120  # slow-starting services, see below
 /usr/local/bin/nuc-verify                        # health check, no privilege
 /usr/local/bin/nuc-verify --since '5 min ago'    # recent journal entries only
 
@@ -138,6 +155,29 @@ programs.zsh.shellAliases = {
 ```
 
 Every run appends to `/var/log/nuc-rebuild.log`.
+
+### Raise `--settle` when the change restarts openHAB
+
+The default is 20s, and that is too short for anything that recreates the openHAB
+container. `nuc-verify` requires tcp/8080 listening, and openHAB's JVM has taken
+~25s from container start to serving. Verification then fails on a perfectly good
+configuration and the watchdog reverts it — a false negative that looks exactly
+like a real fault.
+
+Use `--settle 120` whenever the diff touches `modules/openhab.nix` or anything
+else that changes the container's start script. Cheap insurance: the settle only
+delays the verdict, it never weakens it.
+
+To find out whether a built change will restart the container, diff the start
+scripts rather than guessing:
+
+```bash
+nixos-rebuild build --flake '.#nuc'
+diff <(cat $(grep -oE '/nix/store/\S*unit-script-podman-openhab-start' \
+        /run/current-system/etc/systemd/system/podman-openhab.service)/bin/*) \
+     <(cat $(grep -oE '/nix/store/\S*unit-script-podman-openhab-start' \
+        ./result/etc/systemd/system/podman-openhab.service)/bin/*)
+```
 
 ### Use `--detach` when an agent drives it
 
