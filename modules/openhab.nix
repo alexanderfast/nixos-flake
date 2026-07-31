@@ -5,22 +5,44 @@
     zwave = { };
   };
 
+  # uid 9001 must stay: it is the uid the openhab/openhab image runs its JVM as,
+  # and the bind mounts below are owned by it. A service account for a container
+  # needs no login shell or home, hence isSystemUser.
+  #
+  # /home/openhab was already created by the earlier isNormalUser declaration and
+  # is NOT removed by this change -- NixOS never deletes home directories. It is
+  # inert (nothing in the flake references it, and the container has its own mount
+  # namespace so it cannot see it), but it is still there to be cleaned up by hand.
   users.users.openhab = {
     uid = 9001;
-    isNormalUser = true;
+    isSystemUser = true;
+    group = "openhab";
     description = "openhab";
-    extraGroups = [ "openhab" "zwave" ];
+    extraGroups = [ "zwave" ];
   };
 
+  # 0770, not 0777: the container's JVM runs as uid 9001 = openhab, so owner
+  # permissions are sufficient and world-write was never needed.
+  #
+  # The parent is declared too because it had drifted to uid 1001 -- a uid that no
+  # longer exists on this system -- with mode 0774. Nothing runs as 1001, and the
+  # container is unaffected either way since podman resolves the bind mounts as
+  # root before dropping privileges, so the container never traverses this path.
   systemd.tmpfiles.rules = [
-    "d /srv/openhab/conf     0777 openhab openhab"
-    "d /srv/openhab/userdata 0777 openhab openhab"
-    "d /srv/openhab/addons   0777 openhab openhab"
-    # "d /srv/openhab/.java    0777 openhab openhab"
+    "d /srv/openhab          0750 openhab openhab"
+    "d /srv/openhab/conf     0770 openhab openhab"
+    "d /srv/openhab/userdata 0770 openhab openhab"
+    "d /srv/openhab/addons   0770 openhab openhab"
   ];
 
+  # 3000 and 8091 were opened for the zwave-js-ui container that is commented out
+  # below, so they were surface for nothing -- confirmed with `ss`: unbound.
+  #
+  # 8080 is deliberately still open on the LAN, but note it is only partly
+  # authenticated: /rest/things and /rest/inbox return 401 while /rest/items
+  # returns 200 and leaks live item state. See the "[C] openHAB firewall" card.
   networking.firewall = {
-    allowedTCPPorts = [ 3000 8080 8091 ];
+    allowedTCPPorts = [ 8080 ];
   };
 
   # Bus 001 Device 011: ID 0658:0200 Sigma Designs, Inc. Aeotec Z-Stick Gen5 (ZW090) - UZB
