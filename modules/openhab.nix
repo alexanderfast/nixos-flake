@@ -83,6 +83,12 @@
       image = "openhab/openhab:5.0.1";
       autoStart = true; # equivalent to restart: unless-stopped
 
+      # The JVM does not take its zone from the bind-mounted /etc/localtime
+      # below, so without this openhab.log is written in UTC while the host runs
+      # CEST -- log lines look two hours older than the journal entries you are
+      # comparing them against. Sourced from time.timeZone so it cannot drift.
+      environment.TZ = config.time.timeZone;
+
       # Expose ports
       # ports = [ "8080:8080" ];
 
