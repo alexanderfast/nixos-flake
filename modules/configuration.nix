@@ -54,7 +54,39 @@
 
     # package = pkgs.nixFlakes;
     # extraOptions = "experimental-features = nix-command flakes";
+
+    # Garbage collection. Without this the store grows without bound -- every
+    # rebuild adds a generation, which adds up fast while iterating.
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+
+    # Deduplicate identical files in the store by hardlinking them.
+    # Non-destructive, and effective here because consecutive generations share
+    # nearly all of their content.
+    optimise.automatic = true;
   };
+
+  # WARNING for anyone adding foreign (non-Nix) binaries to this machine:
+  # gc deletes any glibc that no surviving generation references. A binary
+  # patched with `patchelf --set-interpreter /nix/store/<hash>-glibc-.../ld.so`
+  # therefore breaks the moment the generation pinning that glibc is collected,
+  # and it breaks *permanently* -- it will not start again until re-patched.
+  #
+  # This nearly bit us: ~/.npm-global/bin/claude (installed via npm, see
+  # home-manager/nuc.nix) was patched to glibc-2.39-52, which by 2026-07-31 was
+  # referenced only by 17 generations, all older than 30 days. Turning gc on
+  # would have deleted it. It has been re-patched to the glibc in the current
+  # system closure.
+  #
+  # The durable fix is `programs.nix-ld.enable = true`: it replaces the
+  # /lib64/ld-linux-x86-64.so.2 stub with a shim that follows the current
+  # system, so such binaries need no patching and survive both glibc updates and
+  # gc. Note that the stub is what is installed today and it refuses to run
+  # anything, so do not point a binary at /lib64/ld-linux-x86-64.so.2 until
+  # nix-ld is actually enabled.
 
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
