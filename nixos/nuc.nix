@@ -9,29 +9,10 @@
   ...
 }:
 {
-  # You can import other NixOS modules here
   imports = [
-    # If you want to use modules your own flake exports (from modules/nixos):
-    # outputs.nixosModules.example
-
-    # Or modules from other flakes (such as nixos-hardware):
-    # inputs.hardware.nixosModules.common-cpu-amd
-    # inputs.hardware.nixosModules.common-ssd
-    # inputs.nix-minecraft.nixosModules.minecraft-servers
-
-    # You can also split up your configuration and import pieces of it here:
-    # ./users.nix
-
-    # Import your generated (nixos-generate-config) hardware configuration
-    # ./hardware-configuration.nix
     ../hosts/nuc/hardware.nix
     ../modules/configuration.nix
-
-    # ../../configuration.nix
-    #../modules/home-xfce4-i3.nix
-    # ../modules/nvidia.nix
     ../modules/bootgrub.nix
-    ../modules/configuration.nix
     ../modules/openhab.nix
     ../modules/jellyfin.nix
     ../modules/dnsmasq.nix
@@ -39,56 +20,15 @@
     ../modules/nuc-rebuild-sudo.nix
   ];
 
-  nixpkgs = {
-    # You can add overlays here
-    overlays = [
-      # Add overlays your own flake exports (from overlays and pkgs dir):
-      outputs.overlays.additions
-      outputs.overlays.modifications
-      outputs.overlays.recent-claude
+  # nixpkgs.config.allowUnfree is set in ../modules/configuration.nix.
+  nixpkgs.overlays = [
+    outputs.overlays.additions
+    outputs.overlays.modifications
+    outputs.overlays.recent-claude
+  ];
 
-      # You can also add overlays exported from other flakes:
-      # neovim-nightly-overlay.overlays.default
-
-      # Or define it inline, for example:
-      # (final: prev: {
-      #   hi = final.hello.overrideAttrs (oldAttrs: {
-      #     patches = [ ./change-hello-to-hi.patch ];
-      #   });
-      # })
-
-      # inputs.nix-minecraft.overlay
-    ];
-    # Configure your nixpkgs instance
-    config = {
-      # Disable if you don't want unfree packages
-      allowUnfree = true;
-    };
-  };
-
-  nix =
-    let
-      flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
-    in
-    {
-      settings = {
-        # Enable flakes and new 'nix' command
-        experimental-features = "nix-command flakes";
-        # Opinionated: disable global registry
-        flake-registry = "";
-        # Workaround for https://github.com/NixOS/nix/issues/9574
-        nix-path = config.nix.nixPath;
-      };
-      # Opinionated: disable channels
-      channel.enable = false;
-
-      # Opinionated: make flake registry and nix path match flake inputs
-      registry = lib.mapAttrs (_: flake: { inherit flake; }) flakeInputs;
-      nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
-
-      # package = pkgs.nixFlakes;
-      # extraOptions = "experimental-features = nix-command flakes";
-    };
+  # nix.settings / registry / nixPath / gc / optimise all come from
+  # ../modules/configuration.nix.
 
   networking.hostName = "nuc";
 
@@ -387,7 +327,6 @@
         };
       };
       desktopManager = {
-        plasma6.enable = true;
         xterm.enable = true;
         xfce = {
           enable = true;
@@ -403,8 +342,9 @@
     };
   };
 
-  hardware.opengl.enable = true;
+  hardware.graphics.enable = true;
 
+  services.desktopManager.plasma6.enable = true;
   services.displayManager.defaultSession = "plasma";
 
   services.btrfs.autoScrub = {
