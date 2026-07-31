@@ -116,8 +116,16 @@ sudo -n /usr/local/bin/nuc-rebuild --watchdog 20 # longer auto-revert deadline
 /usr/local/bin/nuc-verify --since '5 min ago'    # recent journal entries only
 
 journalctl -fu nuc-rebuild-run                     # follow a detached run
+systemctl show nuc-rebuild-run -p Result -p ExecMainStatus  # its verdict
 systemctl list-timers nuc-rebuild-watchdog.timer   # is a revert armed?
 ```
+
+**`--detach` returns immediately and does not report the outcome.** It exits 0
+once the transient unit is enqueued, which says the run *started*, nothing more —
+read the journal for the verdict. Until `--no-block` was added, `systemd-run`
+waited on the `Type=oneshot` start job and returned the run's own exit status, so
+`--detach` blocked for the full rebuild and then misreported any failure inside
+the run as a failure to launch it.
 
 If you want short names, add aliases in home-manager rather than putting
 unmanaged `/usr/local/bin` on the system PATH:

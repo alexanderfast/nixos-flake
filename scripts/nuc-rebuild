@@ -103,19 +103,34 @@ if [ "$DETACH" = 1 ] && [ "${NUC_REBUILD_DETACHED:-0}" != 1 ]; then
   # HOME likewise: systemd sets it only for units with User=, so a root unit gets
   # none, and both git and nix silently lose their global config and caches
   # ("fatal: $HOME not set"). Be explicit rather than depending on a fallback.
-  if run_err=$(systemd-run --unit="$RUN_UNIT" --collect --service-type=oneshot \
+  # --no-block is load-bearing, and not an optimisation. Without it systemd-run
+  # waits for the start job, and a Type=oneshot job is not "done" until ExecStart
+  # exits -- so systemd-run blocked for the whole run and returned the *inner*
+  # exit status. The else branch below then reported a failed rebuild as a failure
+  # to launch: on 2026-07-31 22:54 an activation that failed and correctly
+  # self-reverted was announced as "could not start nuc-rebuild-run; refusing to
+  # run attached", sending the reader looking for a launch problem that did not
+  # exist, with an empty $run_err because there was no launch error to print.
+  #
+  # With --no-block, systemd-run returns once the job is enqueued, so a non-zero
+  # status here means what this branch claims it means. The run's own verdict is
+  # in the journal, which is the point of detaching.
+  if run_err=$(systemd-run --no-block --unit="$RUN_UNIT" --collect \
+       --service-type=oneshot \
        --setenv=NUC_REBUILD_DETACHED=1 \
        --setenv=PATH="$SAFE_PATH" \
        --setenv=HOME=/root \
        --description="nuc rebuild+verify (detached)" \
        "$0" --yes --watchdog "$WATCHDOG_MIN" --settle "$SETTLE" 2>&1); then
     log "detached: running as $RUN_UNIT.service (owned by PID 1)"
+    log "this command has NOT waited for the verdict -- the run is still going."
     log "follow with:  journalctl -fu $RUN_UNIT"
+    log "outcome:      systemctl show $RUN_UNIT -p Result -p ExecMainStatus"
     log "or read:      $LOG"
     exit 0
   else
-    log "systemd-run failed: $run_err"
-    die "could not start $RUN_UNIT; refusing to run attached to a session that may die"
+    log "systemd-run could not launch the unit: ${run_err:-(no output)}"
+    die "could not start $RUN_UNIT; nothing was activated and no watchdog is armed"
   fi
 fi
 
