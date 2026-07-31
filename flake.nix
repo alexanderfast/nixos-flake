@@ -1,5 +1,5 @@
 {
-  description = "NixOS and home-manager configuration for alex's hosts (nuc, work, laptop)";
+  description = "NixOS and home-manager configuration for alex's nuc";
 
   inputs = {
     # Nixpkgs
@@ -68,21 +68,13 @@
 
     # NixOS configuration entrypoint
     # Available through 'nixos-rebuild --flake .#your-hostname'
+    #
+    # `nuc` is the only live host. The work, laptop and alien configurations
+    # were removed on 2026-07-31 -- recover them from git history if a machine
+    # comes back, but expect to port them: they were last evaluated against
+    # nixpkgs 24.11-era options, and one of them (alien) already referenced
+    # files that no longer exist.
     nixosConfigurations = {
-      work = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          # > Our main nixos configuration file <
-          ./nixos/work.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.alex = ./home-manager/work.nix;
-          }
-        ];
-      };
-
       nuc = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
@@ -93,20 +85,6 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.alex = ./home-manager/nuc.nix;
-          }
-        ];
-      };
-
-      laptop = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          # > Our main nixos configuration file <
-          ./hosts/laptop/default.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.alex = ./home-manager/home.nix;
           }
         ];
       };

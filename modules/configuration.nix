@@ -288,10 +288,9 @@
     # For things that ARE secret (passwords, tokens, WireGuard private keys) do
     # NOT inline them: everything in /nix/store is world-readable on the host,
     # so that would leak even from a private repo. Use the `*File` variant of
-    # the option, pointing at a path outside the store -- as the commented-out
-    # wg-quick block in hosts/laptop/default.nix already does with
-    # `privateKeyFile` -- or adopt sops-nix/agenix, which keep *encrypted*
-    # secrets in the repo and decrypt them at activation.
+    # the option, pointing at a path outside the store, or adopt
+    # sops-nix/agenix, which keep *encrypted* secrets in the repo and decrypt
+    # them at activation.
     openssh.authorizedKeys.keys = [
       # 3072-bit RSA, SHA256:2SnkCAEpNtSn9I2Jo4/GQ3N/nM7T+anj9+xcGGD8bwg
       # Pre-existing key, declared here so remote access is reproducible rather
