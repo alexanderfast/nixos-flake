@@ -269,6 +269,21 @@
   programs.git.enable = true;
   programs.zsh.enable = true;
 
+  # Let root open this repo. `nixos-rebuild` evaluates the flake as root -- build,
+  # test and switch each do it -- but /home/alex/flake is owned by alex, so git's
+  # ownership check aborts with "repository path '/home/alex/flake' is not owned
+  # by current user" before any build starts. This is not a permission problem
+  # root can muscle past; the check is on ownership, not mode.
+  #
+  # It has to be declared here rather than with `git config --system`, because
+  # /etc/gitconfig is a symlink into the store and is not writable. Both the git
+  # CLI and the libgit2-based fetcher that nix uses read it, and the two need to
+  # agree: nix resolves the flake, while nuc-rebuild shells out to `git` for the
+  # HEAD and dirty-tree lines in its log.
+  programs.git.config = {
+    safe.directory = [ "/home/alex/flake" ];
+  };
+
   users.users.alex = {
     isNormalUser = true;
     description = "Alex";

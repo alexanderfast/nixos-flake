@@ -99,9 +99,14 @@ if [ "$DETACH" = 1 ] && [ "${NUC_REBUILD_DETACHED:-0}" != 1 ]; then
   # environment, which on NixOS is just the systemd store bin. There is no
   # /bin/bash or /usr/bin/bash, so the `#!/usr/bin/env bash` shebang would fail
   # with 127 before this script's own `export PATH` above could run.
+  #
+  # HOME likewise: systemd sets it only for units with User=, so a root unit gets
+  # none, and both git and nix silently lose their global config and caches
+  # ("fatal: $HOME not set"). Be explicit rather than depending on a fallback.
   if run_err=$(systemd-run --unit="$RUN_UNIT" --collect --service-type=oneshot \
        --setenv=NUC_REBUILD_DETACHED=1 \
        --setenv=PATH="$SAFE_PATH" \
+       --setenv=HOME=/root \
        --description="nuc rebuild+verify (detached)" \
        "$0" --yes --watchdog "$WATCHDOG_MIN" --settle "$SETTLE" 2>&1); then
     log "detached: running as $RUN_UNIT.service (owned by PID 1)"
@@ -116,8 +121,15 @@ fi
 
 # ------------------------------------------------------------------- context
 log "=== nuc-rebuild start (dry-run=$DRY_RUN watchdog=${WATCHDOG_MIN}m settle=${SETTLE}s) ==="
-GIT_HEAD=$(git -C "$FLAKE_DIR" rev-parse --short HEAD 2>/dev/null || echo '?')
-GIT_DIRTY=$(git -C "$FLAKE_DIR" status --porcelain 2>/dev/null | wc -l)
+# Do not swallow git errors here. When these were `|| echo '?'`, a repo root
+# could not read reported "flake at ? (0 uncommitted change(s))" -- the dirty-tree
+# warning below silently became a guarantee of cleanliness. Stop instead: this log
+# is meant to be an audit trail of what was activated.
+GIT_HEAD=$(git -C "$FLAKE_DIR" rev-parse --short HEAD 2>&1) \
+  || die "cannot read git HEAD in $FLAKE_DIR: $GIT_HEAD"
+GIT_DIRTY=$(git -C "$FLAKE_DIR" status --porcelain 2>&1) \
+  || die "cannot read git status in $FLAKE_DIR: $GIT_DIRTY"
+GIT_DIRTY=$(printf '%s' "$GIT_DIRTY" | grep -c . || true)
 log "flake at $GIT_HEAD ($GIT_DIRTY uncommitted change(s))"
 [ "$GIT_DIRTY" -gt 0 ] && log "WARNING: working tree is dirty; activating uncommitted state"
 
