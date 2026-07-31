@@ -96,6 +96,23 @@
       extraOptions = [
         "--device=/dev/zwave:/dev/zwave"
         "--group-add=tty" # adds container to tty group
+
+        # The image ships a HEALTHCHECK, and podman registers a transient
+        # timer+service per container to run it. On recreation that timer fires
+        # within ~2s, while the JVM is still booting: the probe reports
+        # health_status=starting and `podman healthcheck run` exits 1, the
+        # transient unit fails, and switch-to-configuration counts ANY failed
+        # unit and exits 4. So every change that recreates this container had a
+        # race against openHAB's own startup, and losing it aborted activation
+        # and rolled the whole generation back -- see the 2026-07-31 22:54 run.
+        #
+        # Dropping the healthcheck rather than teaching nuc-rebuild to ignore
+        # those units, deliberately: nothing consumes the health status (no
+        # --health-on-failure action is set), and nuc-verify already proves
+        # liveness better by requiring podman-openhab.service active AND 8080
+        # listening. The alternative would mean loosening the revert path, which
+        # should keep treating a failed unit as a failure.
+        "--no-healthcheck"
         # "--group-add=zwave"
         "--network=host" # uncomment if you want host networking instead of port mapping
       ];
