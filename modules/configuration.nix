@@ -81,12 +81,19 @@
   # would have deleted it. It has been re-patched to the glibc in the current
   # system closure.
   #
-  # The durable fix is `programs.nix-ld.enable = true`: it replaces the
+  # The durable fix, enabled below: nix-ld replaces the
   # /lib64/ld-linux-x86-64.so.2 stub with a shim that follows the current
   # system, so such binaries need no patching and survive both glibc updates and
-  # gc. Note that the stub is what is installed today and it refuses to run
-  # anything, so do not point a binary at /lib64/ld-linux-x86-64.so.2 until
-  # nix-ld is actually enabled.
+  # gc.
+  #
+  # ORDERING MATTERS. Until this is activated, /lib64/ld-linux-x86-64.so.2 is a
+  # stub that refuses to run anything, so a binary must NOT be pointed at that
+  # path before a rebuild has actually enabled nix-ld -- it would stop starting
+  # immediately. The safe sequence is: activate this, confirm
+  # /lib64/ld-linux-x86-64.so.2 no longer resolves to stub-ld, then
+  # `patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 <binary>`, then
+  # confirm a *fresh* process starts.
+  programs.nix-ld.enable = true;
 
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
