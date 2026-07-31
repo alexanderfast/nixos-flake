@@ -190,8 +190,9 @@
   # console.keyMap = "sv-latin1";
   console.useXkbConfig = true;
 
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
+  # No CUPS: the nuc is headless and has no printer. It was enabled and idle,
+  # listening on 127.0.0.1:631 -- harmless, but surface for nothing. Set
+  # services.printing.enable = true if a printer is ever attached here.
 
   # Enable sound with pipewire.
   # sound.enable = true;
