@@ -24,8 +24,31 @@
       server = [
         #"192.168.1.1"
         #"8.8.8.8"
+
+        # Tailnet names exist only inside the tailnet -- public resolvers
+        # NXDOMAIN them -- so hand that one zone to tailscaled's MagicDNS
+        # resolver. Delegated rather than copied into `address` below because
+        # the node list belongs to Tailscale's coordination server and changes
+        # as devices join or re-auth; a copy would go stale silently.
+        # Update this suffix if the tailnet is ever renamed again.
+        "/magpie-kochab.ts.net/100.100.100.100"
+
         "9.9.9.9"
       ];
+
+      # Reverse lookups for the tailnet's 100.64.0.0/10 range, so a 100.x
+      # address maps back to a node name instead of hanging.
+      rev-server = "100.64.0.0/10,100.100.100.100";
+
+      # This resolver serves the whole house, but dnsmasq's defaults are sized
+      # for one machine: a 150-entry cache and 150 in-flight forwarded queries.
+      # Exhausting the latter makes dnsmasq *drop* queries rather than queue
+      # them, which is what produced 358 "Maximum number of concurrent DNS
+      # queries reached" in 7 days and put "DNS unavailable" health warnings on
+      # every Tailscale node -- they all forward here. Upstream was healthy
+      # throughout, so this is volume, not a slow server.
+      cache-size = 10000;
+      dns-forward-max = 1000;
 
       # Add your custom names here
       address = [
