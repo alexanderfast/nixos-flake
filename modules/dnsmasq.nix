@@ -17,6 +17,15 @@
       # Run dnsmasq on a non-standard port to avoid systemd-resolved
       port = 53;
 
+      # Ignore /etc/dnsmasq-resolv.conf. resolvconf merges tailscaled's
+      # `nameserver 100.100.100.100` fragment into that file, and without this
+      # flag dnsmasq picks it up as a *generic* upstream alongside 9.9.9.9. Then
+      # tailscaled's own upstream is dnsmasq (127.0.0.1), and generic queries
+      # loop between the two until each side times out -- house-wide slow DNS,
+      # since every device forwards here. Explicit `server=` lines below are
+      # enough; the split-DNS entry keeps tailnet names resolving.
+      no-resolv = true;
+
       # interface = [ "enp86s0" ];
       # bind-interface = "true";
 
