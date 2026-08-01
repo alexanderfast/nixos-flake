@@ -7,6 +7,11 @@ Instructions for Claude Code working in this repo.
 Findings about this flake are tracked as cards on the **NUC** list of the
 **🗓️ Weekly Workflow** board, not in a TODO file in this repo. Don't create one.
 
+Card names carry a severity grade, worst first: `[A]` breaks evaluation, `[B]`
+operational risk, `[C]` security exposure, `[D]` dead code, `[E]` deprecated or
+renamed options, `[F]` cosmetic. `[+]` is not a grade -- it means a feature
+request rather than a defect. Reuse these six; don't invent more.
+
 Authorized, no need to ask:
 
 - comment on a card on the NUC list
